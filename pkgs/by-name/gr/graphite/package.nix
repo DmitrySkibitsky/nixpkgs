@@ -12,10 +12,9 @@
   lld,
   pkg-config,
   binaryen,
-  wasm-pack,
   cargo-about,
   nodejs,
-  wasm-bindgen-cli_0_2_100,
+  wasm-bindgen-cli_0_2_121,
   xz,
   removeReferencesTo,
   cef-binary,
@@ -27,20 +26,19 @@
   libxcursor,
   libx11,
   libxcb,
-  nix-update-script,
 }:
 
 let
-  version = "0-unstable-2026-03-13";
-  rev = "eb30ee78bcf8971dc0098f07bdef1fef9d4a7e19";
+  version = "0-unstable-2026-08-25";
+  rev = "404d9f3047711d900e04573548745b869946f240";
 
-  srcHash = "sha256-cQ6dLoFoNyiFFD/JVZ+U9kHrk2ZTcBxBCf8c3sMjCfQ=";
-  shaderHash = "sha256-uc6FU0df5Xqp6YXEwODULhgUjSQvjRFGvdk+uFB7II0=";
-  cargoHash = "sha256-GvKUZrrLYR2J4CnAbMs4TS6eOxSCq4AMecPGp6+008s=";
-  npmHash = "sha256-r9jfk/fs6mL9L/7heelamOKzlCEu23UWId0kX35mOgE=";
+  srcHash = "sha256-FdLdro7T8hyoNUT8dCd/ilZEUARPnFxqztbtxaNk9ws=";
+  shaderHash = "sha256-9yr//4t8k8Ncdli9AyBnkB2Pz9GgNhoumpdOv2uqL3k=";
+  cargoHash = "sha256-BHuYW90vTtDbfre6br7nTFa3VWgX01AlalXKwjiSSnA=";
+  npmHash = "sha256-Rb0bLPk54QigNp7TkDkJJy/TEJXAhlXOCruckwvdXks=";
 
-  brandingRev = "8ae15dc9c51a3855475d8cab1d0f29d9d9bc622c";
-  brandingHash = "sha256-mHdwHK2lEeFQWNrjbusvRULEmm03dP+0JM5bnUgHcF8=";
+  brandingRev = "6687dc6d3d8552948458d00d35e2bee3a40ab66b";
+  brandingHash = "sha256-yD4O50gz2mtby1h4o+9PqjMfYmTbBOX6XDc5Ez5fgnY=";
 
   src = fetchFromGitHub {
     owner = "GraphiteEditor";
@@ -82,14 +80,6 @@ let
       mv ./include $out/
 
       cat ./CREDITS.html | ${xz}/bin/xz -9 -e -c > $out/CREDITS.html.xz
-
-      echo '${
-        builtins.toJSON {
-          type = "minimal";
-          name = builtins.baseNameOf finalAttrs.src.url;
-          sha1 = "";
-        }
-      }' > $out/archive.json
     '';
   });
 in
@@ -105,8 +95,7 @@ stdenv.mkDerivation (finalAttrs: {
     pkg-config
     npmHooks.npmConfigHook
     binaryen
-    wasm-bindgen-cli_0_2_100
-    wasm-pack
+    wasm-bindgen-cli_0_2_121
     nodejs
     cargo-about
     removeReferencesTo
@@ -130,6 +119,11 @@ stdenv.mkDerivation (finalAttrs: {
     mkdir branding
     cp -r ${branding}/* branding
     cp $src/.branding branding/.branding
+
+    substituteInPlace $cargoDepsCopy/*/cef-dll-sys-*/build.rs \
+      --replace-fail \
+        'download_cef::check_archive_json(&package_version, &path.to_string_lossy())?;' \
+        ""
   '';
 
   postConfigure = ''
@@ -166,6 +160,7 @@ stdenv.mkDerivation (finalAttrs: {
     patchelf \
       --set-rpath "${lib.makeLibraryPath libraries}:${cefPath}" \
       --add-needed libGL.so \
+      --add-needed libEGL.so \
       $out/bin/graphite
 
     remove-references-to -t ${rustc} $out/bin/graphite
@@ -173,12 +168,7 @@ stdenv.mkDerivation (finalAttrs: {
 
   disallowedReferences = [ rustc ];
 
-  passthru.updateScript = nix-update-script {
-    extraArgs = [
-      "--version=branch"
-      "--version-regex=(0-unstable-.*)"
-    ];
-  };
+  passthru.updateScript = ./update.nu;
 
   meta = {
     description = "Open source vector graphics editor and procedural design engine";

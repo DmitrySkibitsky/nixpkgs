@@ -7,14 +7,14 @@
 
 python3Packages.buildPythonApplication (finalAttrs: {
   pname = "virtnbdbackup";
-  version = "2.45";
+  version = "2.49";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "abbbi";
     repo = "virtnbdbackup";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-lX0zXNSwSOeNZSL+6UScxKK5zg3kQ91zRDA+wDSiu6Q=";
+    hash = "sha256-Z6lHU28pqO3Xf9470mVInJdv0hh/sgNPnMIt57WFbFk=";
   };
 
   build-system = with python3Packages; [
@@ -22,7 +22,7 @@ python3Packages.buildPythonApplication (finalAttrs: {
   ];
 
   dependencies = with python3Packages; [
-    libvirt
+    libvirt-python
     tqdm
     libnbd
     lz4

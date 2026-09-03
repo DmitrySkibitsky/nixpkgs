@@ -14,13 +14,13 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "ada";
-  version = "3.4.3";
+  version = "4.0.0";
 
   src = fetchFromGitHub {
     owner = "ada-url";
     repo = "ada";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-CSFo5aXxN1jhmD9SUh8XysObEyOvm53XPzbwJyCE0WE=";
+    hash = "sha256-TvjoLUKO2+YgS1mlyglLb+rBLTO/SWSBVA2S34Z6kMI=";
   };
 
   nativeBuildInputs = [

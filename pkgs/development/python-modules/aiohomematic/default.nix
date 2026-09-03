@@ -4,6 +4,7 @@
   buildPythonPackage,
   fetchFromGitHub,
   freezegun,
+  openccu-data,
   orjson,
   pydantic,
   pydevccu,
@@ -16,24 +17,26 @@
   setuptools,
 }:
 
-buildPythonPackage rec {
+buildPythonPackage (finalAttrs: {
   pname = "aiohomematic";
-  version = "2026.3.8";
+  version = "2026.8.5";
   pyproject = true;
+  __structuredAttrs = true;
 
   disabled = pythonOlder "3.14";
 
   src = fetchFromGitHub {
     owner = "SukramJ";
     repo = "aiohomematic";
-    tag = version;
-    hash = "sha256-uVG8rMxgb5JwNy9r9jT17BIZFxGn5rxtzRtQV6Mfxkk=";
+    tag = finalAttrs.version;
+    hash = "sha256-AmtDusw8pz+7OK6DMujlOcBn5yQ8K21YImb2aSohp78=";
   };
 
   build-system = [ setuptools ];
 
   dependencies = [
     aiohttp
+    openccu-data
     orjson
     pydantic
     python-slugify
@@ -48,16 +51,22 @@ buildPythonPackage rec {
     pytestCheckHook
   ];
 
+  __darwinAllowLocalNetworking = true;
+
+  disabledTestPaths = [
+    "tests/benchmarks"
+  ];
+
   pythonImportsCheck = [ "aiohomematic" ];
 
   meta = {
     description = "Module to interact with HomeMatic devices";
     homepage = "https://github.com/SukramJ/aiohomematic";
-    changelog = "https://github.com/SukramJ/aiohomematic/blob/${src.tag}/changelog.md";
+    changelog = "https://github.com/SukramJ/aiohomematic/blob/${finalAttrs.src.tag}/changelog.md";
     license = lib.licenses.mit;
     maintainers = with lib.maintainers; [
       dotlambda
       fab
     ];
   };
-}
+})

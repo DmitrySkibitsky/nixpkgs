@@ -9,16 +9,16 @@
 
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "reindeer";
-  version = "2026.02.23.00";
+  version = "2026.08.24.00";
 
   src = fetchFromGitHub {
     owner = "facebookincubator";
     repo = "reindeer";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-m2IqtOzkrKhFfpwNX1KGW2HZz9DLskGXHum8mc4SVuc=";
+    hash = "sha256-wAi4W5E9VJ6tOGLCDbkthziYw7VaJkWFpjRaydq1xpc=";
   };
 
-  cargoHash = "sha256-fWpxIQJOcqzUwHNID+Wc+3QOY9P9hIAYSb9wP8x4pVU=";
+  cargoHash = "sha256-4mCJ+t7GuyEreZt9pmnG3dFykVH5o8Ys0ksDy0SrYPU=";
 
   nativeBuildInputs = [ pkg-config ];
 
@@ -30,7 +30,7 @@ rustPlatform.buildRustPackage (finalAttrs: {
     description = "Generate Buck build rules from Rust Cargo dependencies";
     mainProgram = "reindeer";
     homepage = "https://github.com/facebookincubator/reindeer";
-    license = with lib.licenses; [ mit ];
+    license = lib.licenses.mit;
     maintainers = with lib.maintainers; [ amaanq ];
   };
 })

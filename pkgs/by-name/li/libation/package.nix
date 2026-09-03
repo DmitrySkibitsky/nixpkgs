@@ -10,24 +10,23 @@
   gtk3,
   libxrandr,
   libxi,
+  libsecret,
   libxcursor,
   nix-update-script,
 }:
 
 buildDotnetModule rec {
   pname = "libation";
-  version = "13.3.0";
+  version = "14.0.0";
 
   src = fetchFromGitHub {
     owner = "rmcrackan";
     repo = "Libation";
     tag = "v${version}";
-    hash = "sha256-sq3P1naACfZjvgNxNwSK+6ljkqVnVRKHvCgO0Dre1dc=";
+    hash = "sha256-sTZCcGFYdShTf4tgJS8D7qVu4ML2zHAQXDFnz72pAA8=";
   };
 
   sourceRoot = "${src.name}/Source";
-
-  env.AVALONIA_TELEMETRY_OPTOUT = "1";
 
   dotnet-sdk = dotnetCorePackages.sdk_10_0_1xx;
 
@@ -59,6 +58,8 @@ buildDotnetModule rec {
     gtk3
     # For web view (login dialog); loaded via P/Invoke at runtime
     glib
+    # For encrypting secrets
+    libsecret
   ];
 
   postInstall = ''

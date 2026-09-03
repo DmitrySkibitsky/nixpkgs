@@ -8,15 +8,15 @@
 
 buildGoModule (finalAttrs: {
   pname = "ginkgo";
-  version = "2.28.1";
+  version = "2.32.1";
 
   src = fetchFromGitHub {
     owner = "onsi";
     repo = "ginkgo";
     rev = "v${finalAttrs.version}";
-    sha256 = "sha256-mevZN35RUpaPmAYw3lfmzvdT2H+yucD8g3/bX9Rl00s=";
+    sha256 = "sha256-mXfY+txLg8z+DxPfB8D0SqZMTXNJrDBhPcSVTirkgxg=";
   };
-  vendorHash = "sha256-I3n1FPINb/nhi4QUzRFEspn7REN1dQEPg8Bhb3PemQU=";
+  vendorHash = "sha256-lj8b9f5q9hbPML7uLca74lTCadNOCtGIDmvP+CUwJx4=";
 
   # integration tests expect more file changes
   # types tests are missing CodeLocation

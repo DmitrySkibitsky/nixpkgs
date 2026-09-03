@@ -1,8 +1,9 @@
 {
   fetchFromGitHub,
+  fetchFromCodeberg,
   stdenv,
   lib,
-  nix,
+  nixVersions,
   meson,
   cmake,
   ninja,
@@ -29,16 +30,17 @@ let
       slurm.dev
     ];
   };
+  nix = nixVersions.nix_2_34;
 in
 stdenv.mkDerivation rec {
   pname = "nix-scheduler-hook";
-  version = "0.7.2";
+  version = "0.8.0";
 
-  src = fetchFromGitHub {
-    owner = "lisanna-dettwyler";
+  src = fetchFromCodeberg {
+    owner = "lisanna";
     repo = "nix-scheduler-hook";
     tag = "v${version}";
-    hash = "sha256-tgZ2BZuKmaoPh4h4r/nej98tvl4PvwZfA6xbTLgNZMA=";
+    hash = "sha256-QMenfkNvn6bBGdu+d6i533/CkHNS7Tmr40cgl/ks5dk=";
   };
 
   sourceRoot = "source/src";

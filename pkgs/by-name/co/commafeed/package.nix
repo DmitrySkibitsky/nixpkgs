@@ -12,13 +12,13 @@
   stdenv,
 }:
 let
-  version = "7.0.0";
+  version = "7.3.0";
 
   src = fetchFromGitHub {
     owner = "Athou";
     repo = "commafeed";
     tag = version;
-    hash = "sha256-hoRaegcpimIYfUv81txgXSSdwX8iCU4K5EtZMyozjFQ=";
+    hash = "sha256-VCN8NBVGQl7/D3fESxiw3ipUoK3qBM0SSnEYBB0E+64=";
   };
 
   frontend = buildNpmPackage {
@@ -28,7 +28,7 @@ let
 
     sourceRoot = "${src.name}/commafeed-client";
 
-    npmDepsHash = "sha256-z6W0xyOpGbTogqZ0UgVQMNPXjwLW0ulpwLBtXvf00bQ=";
+    npmDepsHash = "sha256-usdJEjW/Oz993Ik8JZnEQ08ArqmLx/3hSdhlUJgCrig=";
 
     nativeBuildInputs = [ biome ];
 
@@ -54,7 +54,7 @@ maven.buildMavenPackage {
 
   pname = "commafeed";
 
-  mvnHash = "sha256-YY/etqDtnobarg8Cj4vDv7rmzPrOqz6YCyAxjIQlzeU=";
+  mvnHash = "sha256-Gi+KMrdSXlnI34wvAYnJffVCa3WUYkPEFIv382+mwj4=";
   mvnJdk = jdk25;
 
   mvnParameters = lib.escapeShellArgs [
@@ -100,7 +100,7 @@ maven.buildMavenPackage {
     homepage = "https://github.com/Athou/commafeed";
     license = lib.licenses.asl20;
     mainProgram = "commafeed";
-    maintainers = [ ];
+    maintainers = with lib.maintainers; [ svrana ];
     broken = stdenv.hostPlatform.isDarwin || stdenv.hostPlatform.isAarch64;
   };
 }

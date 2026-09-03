@@ -1,6 +1,7 @@
 {
   lib,
   rustPlatform,
+  buildPackages,
   fetchFromGitHub,
   installShellFiles,
   pkg-config,
@@ -13,16 +14,16 @@
 
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "delta";
-  version = "0.19.0";
+  version = "0.19.2";
 
   src = fetchFromGitHub {
     owner = "dandavison";
     repo = "delta";
     tag = finalAttrs.version;
-    hash = "sha256-hVHxzunST35lJXBhSN5eIJfJV+yeRfrYGv2iORUv6W8=";
+    hash = "sha256-vW2mPAxlPXdwqyK/QhU/DOx6MD9u6DDVCDm0OEWm4AQ=";
   };
 
-  cargoHash = "sha256-DGkYtvxhRdKFHUvES0jdynOcWjDX7VEQdNzZ5az0JY0=";
+  cargoHash = "sha256-CC2ncgujdcn1CJxU16beCjfQ1HR2+f6D8qYbZULEm7g=";
 
   nativeBuildInputs = [
     installShellFiles
@@ -42,10 +43,17 @@ rustPlatform.buildRustPackage (finalAttrs: {
     RUSTONIG_SYSTEM_LIBONIG = true;
   };
 
-  postInstall = ''
-    installShellCompletion --cmd delta \
-      etc/completion/completion.{bash,fish,zsh}
-  '';
+  postInstall = lib.optionalString (stdenv.hostPlatform.emulatorAvailable buildPackages) (
+    let
+      emulator = stdenv.hostPlatform.emulator buildPackages;
+    in
+    ''
+      installShellCompletion --cmd delta \
+        --bash <(${emulator} $out/bin/delta --generate-completion bash) \
+        --fish <(${emulator} $out/bin/delta --generate-completion fish) \
+        --zsh <(${emulator} $out/bin/delta --generate-completion zsh)
+    ''
+  );
 
   # test_env_parsing_with_pager_set_to_bat sets environment variables,
   # which can be flaky with multiple threads:

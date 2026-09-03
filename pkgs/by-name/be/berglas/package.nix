@@ -27,24 +27,24 @@ let
     ''
       ${acc}
       substituteInPlace pkg/berglas/${goFileName}_test.go \
-        --replace "TestClient_${testName}_storage" "SkipClient_${testName}_storage" \
-        --replace "TestClient_${testName}_secretManager" "SkipClient_${testName}_secretManager"
+        --replace-fail "TestClient_${testName}_storage" "SkipClient_${testName}_storage" \
+        --replace-fail "TestClient_${testName}_secretManager" "SkipClient_${testName}_secretManager"
     ''
   ) "" (builtins.attrNames skipTests);
 in
 
 buildGoModule (finalAttrs: {
   pname = "berglas";
-  version = "2.0.10";
+  version = "2.0.16";
 
   src = fetchFromGitHub {
     owner = "GoogleCloudPlatform";
     repo = "berglas";
     rev = "v${finalAttrs.version}";
-    sha256 = "sha256-zrNHBlq8ZdsviXws29Dui51HOLJxy5B0OkrRZR8lUdQ=";
+    sha256 = "sha256-I69p9xEWjIZAh5/1sk3G7ARuk0N5DCPTy2cnAA/9QB8=";
   };
 
-  vendorHash = "sha256-tTZQZv5b68AaMLbVtddmlbWerbwvIeYSIX8/Vy0P0HU=";
+  vendorHash = "sha256-LOIQTUYippMd5P3m0mORJaTKhN89g9D6wksNPteG/NI=";
 
   ldflags = [
     "-s"

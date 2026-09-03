@@ -11,7 +11,6 @@
   # runtime deps
   bluez,
   brightnessctl,
-  cava,
   cliphist,
   ddcutil,
   wlsunset,
@@ -33,7 +32,6 @@
 
   bluetoothSupport ? true,
   brightnessctlSupport ? true,
-  cavaSupport ? true,
   cliphistSupport ? true,
   ddcutilSupport ? true,
   wlsunsetSupport ? true,
@@ -51,7 +49,6 @@ let
   ]
   ++ lib.optional bluetoothSupport bluez
   ++ lib.optional brightnessctlSupport brightnessctl
-  ++ lib.optional cavaSupport cava
   ++ lib.optional cliphistSupport cliphist
   ++ lib.optional ddcutilSupport ddcutil
   ++ lib.optional wlsunsetSupport wlsunset
@@ -71,13 +68,13 @@ let
 in
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "noctalia-shell";
-  version = "4.6.7";
+  version = "4.7.7";
 
   src = fetchFromGitHub {
     owner = "noctalia-dev";
-    repo = "noctalia-shell";
+    repo = "noctalia";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-6fuxf185uga/AaeFgN6VUygGE8bUEkzZSA1UQ1FFes4=";
+    hash = "sha256-QszLpoDPD7JEv8B/w1U2u1ksBw/CYBDmwUTLhJrekF0=";
   };
 
   nativeBuildInputs = [
@@ -116,9 +113,9 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   passthru.updateScript = nix-update-script { };
 
   meta = {
-    changelog = "https://github.com/noctalia-dev/noctalia-shell/releases/tag/v${finalAttrs.version}";
+    changelog = "https://github.com/noctalia-dev/noctalia/releases/tag/v${finalAttrs.version}";
     description = "Sleek and minimal desktop shell thoughtfully crafted for Wayland, built with Quickshell";
-    homepage = "https://github.com/noctalia-dev/noctalia-shell";
+    homepage = "https://github.com/noctalia-dev/noctalia";
     license = lib.licenses.mit;
     mainProgram = "noctalia-shell";
     maintainers = with lib.maintainers; [ spacedentist ];

@@ -7,17 +7,18 @@
   coreutils,
   fetchFromGitHub,
   makeWrapper,
+  nix-update-script,
 }:
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "diff-so-fancy";
-  version = "1.4.6";
+  version = "1.4.12";
 
   src = fetchFromGitHub {
     owner = "so-fancy";
     repo = "diff-so-fancy";
     rev = "v${finalAttrs.version}";
-    sha256 = "sha256-Wbiz82mTqjJG3WeVOkaOzuPfXCdprJkCSs/Ye3OUlE0=";
+    sha256 = "sha256-5laSG8UWsCXAK+Woiz1Opy3VViboCI7J2AsqoDiuq7k=";
   };
 
   nativeBuildInputs = [
@@ -51,6 +52,8 @@ stdenv.mkDerivation (finalAttrs: {
 
     runHook postInstall
   '';
+
+  passthru.updateScript = nix-update-script { };
 
   meta = {
     homepage = "https://github.com/so-fancy/diff-so-fancy";

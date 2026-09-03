@@ -3,7 +3,6 @@
   stdenv,
 
   buildGoModule,
-  go_1_26,
   fetchFromGitHub,
 
   makeWrapper,
@@ -23,9 +22,9 @@
   tailscale-nginx-auth,
 }:
 
-buildGoModule.override { go = go_1_26; } (finalAttrs: {
+buildGoModule (finalAttrs: {
   pname = "tailscale";
-  version = "1.96.2";
+  version = "1.102.3";
 
   outputs = [
     "out"
@@ -36,10 +35,10 @@ buildGoModule.override { go = go_1_26; } (finalAttrs: {
     owner = "tailscale";
     repo = "tailscale";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-6taTRKYFxCNK7BUnNZ3lljqVS7AeYEfm46gmilf6eEk=";
+    hash = "sha256-NzWuMhLCqewkH/vwyfRND8yEubRmUSXe/TYA2ldhFl8=";
   };
 
-  vendorHash = "sha256-rhuWEEN+CtumVxOw6Dy/IRxWIrZ2x6RJb6ULYwXCQc4=";
+  vendorHash = "sha256-amKkUPszyhG4N5ZtrB01swBACYq76raSS+SQRneLmwc=";
 
   nativeBuildInputs = [
     makeWrapper
@@ -176,6 +175,10 @@ buildGoModule.override { go = go_1_26; } (finalAttrs: {
 
         # Fails because we vendor dependencies
         "TestLicenseHeaders"
+
+        # Runs `go test -race`, which requires cgo, but we build with CGO_ENABLED=0
+        "TestRaceAttributedToPassingTest" # cmd/testwrapper
+        "TestRaceSuppressesFlakyRetry" # cmd/testwrapper
 
         # Uses testing/synctest which spawns goroutines that block on syscalls
         # incompatible with synctest's bubble mechanism

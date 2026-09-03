@@ -10,16 +10,16 @@
 
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "hexpatch";
-  version = "1.12.5";
+  version = "1.13.0";
 
   src = fetchFromGitHub {
     owner = "Etto48";
     repo = "HexPatch";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-2FTFVKFql28S3/03M64FJyrwWuI0Zeg8z/nrWZJzGIo=";
+    hash = "sha256-MJNTqCesHGuKkTu3igvU5XSfZRHh2BTabfJmE62+hh4=";
   };
 
-  cargoHash = "sha256-PQEq6g+VItcIG3GBl5sOFtPVZem27+n2JTPjK23xIt8=";
+  cargoHash = "sha256-AUrYy63WLgibbsD4nHexNwQBQaqJi6645OFMM2phglc=";
 
   nativeBuildInputs = [
     cmake
@@ -49,7 +49,7 @@ rustPlatform.buildRustPackage (finalAttrs: {
     '';
     homepage = "https://etto48.github.io/HexPatch/";
     changelog = "https://github.com/Etto48/HexPatch/releases/tag/v${finalAttrs.version}";
-    license = lib.licenses.mit;
+    license = lib.licenses.agpl3Only;
     maintainers = with lib.maintainers; [ ratcornu ];
     mainProgram = "hexpatch";
   };

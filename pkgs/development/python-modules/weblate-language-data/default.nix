@@ -8,14 +8,14 @@
 
 buildPythonPackage (finalAttrs: {
   pname = "weblate-language-data";
-  version = "2026.6";
+  version = "2026.8";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "WeblateOrg";
     repo = "language-data";
     tag = finalAttrs.version;
-    hash = "sha256-pgt2GtqlkbF+85wkSLkbyvaptN7Htp3SOdLtUptQ3OU=";
+    hash = "sha256-7wNm6bu2L1/eF5D49wSYu1qfVC5Fl5MbaSbXO/az4F4=";
   };
 
   build-system = [ setuptools ];

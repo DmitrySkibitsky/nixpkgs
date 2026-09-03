@@ -10,14 +10,14 @@
 
 buildPythonPackage rec {
   pname = "victron-ble-ha-parser";
-  version = "0.4.10";
+  version = "0.7.0";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "rajlaud";
     repo = "victron-ble-ha-parser";
     tag = "v${version}";
-    hash = "sha256-mvQrY1f3Da621yMgTzxduZQ0pxCJN6j7+6pgFwgl4Rs=";
+    hash = "sha256-WbJ0OQHTWigszOQ03427Nk6xfKqTHcPQ63tcSvG3x/k=";
   };
 
   build-system = [ setuptools ];

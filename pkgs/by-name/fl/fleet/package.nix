@@ -12,12 +12,12 @@
 }:
 let
   pname = "fleet";
-  version = "4.81.0";
+  version = "4.90.1";
   src = fetchFromGitHub {
     owner = "fleetdm";
     repo = "fleet";
     tag = "fleet-v${version}";
-    hash = "sha256-LPbMcaQ3YIfh5qwIBB7BwJFgMPurCJudrOzUPm5+VcM=";
+    hash = "sha256-yD1snjDI5AAnHmnbpAUhtRx7ayPyqn9Tqv84p5W3SV4=";
   };
 
   frontend = stdenvNoCC.mkDerivation {
@@ -32,7 +32,7 @@ let
 
     yarnOfflineCache = fetchYarnDeps {
       yarnLock = src + "/yarn.lock";
-      hash = "sha256-9FuGmL9/hkPZo0ecneL4i9Hg6gkRbwhKGfIvn3/YpVo=";
+      hash = "sha256-OVXnPUQOr8KQYNthE8RzPV9IoQH8pxXHqjgTy7ymW/k=";
     };
 
     NODE_ENV = "production";
@@ -54,7 +54,7 @@ in
 buildGoModule (finalAttrs: {
   inherit pname version src;
 
-  vendorHash = "sha256-kudomUa5c0OJA2LgqLQ2Az0mDH/s9go3jHdyeALGgs8=";
+  vendorHash = "sha256-1IGhOxzrQAyZu9a4HUvdN0MV5x8WnWMcFQejwy5WF1c=";
 
   subPackages = [
     "cmd/fleet"

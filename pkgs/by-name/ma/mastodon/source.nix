@@ -5,19 +5,19 @@
   patches ? [ ],
 }:
 let
-  version = "4.5.7";
+  version = "4.6.7";
 in
 applyPatches {
   src = fetchFromGitHub {
     owner = "mastodon";
     repo = "mastodon";
     rev = "v${version}";
-    hash = "sha256-+JRoUtRI7vTQG8eLpJxMhQMAR2FeIzGfJtR9pj0sW3A=";
+    hash = "sha256-gSJXe4/uRYYKQTmjMirD2uFA7ymRl2LQP6VHt8nBD9k=";
     passthru = {
       inherit version;
-      yarnHash = "sha256-2MOl6kHidkGU2I/cZaUmbQCiEl9SDfL/j9fT/6eNdFA=";
+      yarnHash = "sha256-VlOG91ZuO+1UXTbtwIrYUbqHjmSfPSfLhrf4TxCJqJ0=";
       yarnMissingHashes = ./missing-hashes.json;
     };
   };
-  patches = patches ++ [ ];
+  patches = [ ];
 }

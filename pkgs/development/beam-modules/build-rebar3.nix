@@ -44,6 +44,9 @@ lib.extendMkDerivation {
       name = "erlang${erlang.version}-${args.name}-${finalAttrs.version}";
 
       nativeBuildInputs = (args.nativeBuildInputs or [ ]) ++ [
+        erlang
+        rebar3Custom
+
         rebarDevendorPatchHook
         beamCopySourceHook
         beamModuleInstallHook
@@ -51,13 +54,14 @@ lib.extendMkDerivation {
       ];
 
       buildInputs = (args.buildInputs or [ ]) ++ [
-        erlang
-        rebar3Custom
         openssl
         libyaml
       ];
 
       propagatedBuildInputs = lib.unique beamDeps;
+
+      __structuredAttrs = true;
+      strictDeps = true;
 
       env = {
         ERL_COMPILER_OPTIONS =
@@ -67,7 +71,8 @@ lib.extendMkDerivation {
           "[${lib.concatStringsSep "," options}]";
 
         beamModuleName = args.name;
-      };
+      }
+      // (args.env or { });
 
       setupHook = writeText "setupHook.sh" ''
         addToSearchPath ERL_LIBS "$1/lib/erlang/lib/"

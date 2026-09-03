@@ -15,16 +15,16 @@
 }:
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "spacetimedb";
-  version = "2.0.5";
+  version = "2.8.3";
 
   src = fetchFromGitHub {
     owner = "clockworklabs";
     repo = "spacetimedb";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-oTxwEt9TNAjzfhr9ivdABiQH8iPhnx41GAriglQstlA=";
+    hash = "sha256-RlTzuItgepuHD3sWVF+twLlma460JGAHuvT67MtsmAM=";
   };
 
-  cargoHash = "sha256-24h/JXhF6SZqMJRP9cxOYfh1NHKCIxRYH2xoSpwy0jA=";
+  cargoHash = "sha256-j5+ueZG39oP7D/vn2gYOsAWGKaO/WtQOHLczSRN6WrA=";
 
   nativeBuildInputs = [
     pkg-config
@@ -48,7 +48,7 @@ rustPlatform.buildRustPackage (finalAttrs: {
     "--skip=codegen"
     "--skip=publish"
   ]
-  ++ lib.optionals stdenv.isDarwin [
+  ++ lib.optionals stdenv.hostPlatform.isDarwin [
     # flakes on darwin in nix build sandbox, timing out waiting for listen addr
     "--skip=cli_can_ping_spacetimedb_on_disk"
     "--skip=cli_can_publish_spacetimedb_on_disk"
@@ -74,6 +74,7 @@ rustPlatform.buildRustPackage (finalAttrs: {
     SPACETIMEDB_NIX_BUILD_GIT_COMMIT = finalAttrs.src.rev;
     # required to make jemalloc_tikv_sys build
     CFLAGS = "-O";
+    RUSTFLAGS = "--cfg tokio_unstable";
   };
 
   nativeInstallCheckInputs = [ versionCheckHook ];
@@ -86,6 +87,11 @@ rustPlatform.buildRustPackage (finalAttrs: {
   passthru.updateScript = nix-update-script { };
 
   meta = {
+    platforms = [
+      "x86_64-linux"
+      "aarch64-linux"
+      "aarch64-darwin"
+    ];
     description = "Full-featured relational database system that lets you run your application logic inside the database";
     homepage = "https://github.com/clockworklabs/SpacetimeDB";
     license = lib.licenses.bsl11;

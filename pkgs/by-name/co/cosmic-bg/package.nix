@@ -7,20 +7,21 @@
   libcosmicAppHook,
   just,
   nasm,
+  dav1d,
   nix-update-script,
   nixosTests,
 }:
 
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "cosmic-bg";
-  version = "1.0.8";
+  version = "1.6.0";
 
   # nixpkgs-update: no auto update
   src = fetchFromGitHub {
     owner = "pop-os";
     repo = "cosmic-bg";
     tag = "epoch-${finalAttrs.version}";
-    hash = "sha256-epwCl68NWKgGMUrwIA7ALlOLMTLxyShqfV0ARXsZxrs=";
+    hash = "sha256-tvYVe3H99oB6NYzLjwzX+ccSFh54LAfvuLmFoCIaJp4=";
   };
 
   postPatch = ''
@@ -29,12 +30,19 @@ rustPlatform.buildRustPackage (finalAttrs: {
       "${cosmic-wallpapers}/share/backgrounds/cosmic/orion_nebula_nasa_heic0601a.jpg"
   '';
 
-  cargoHash = "sha256-BEQQy79s9B0GLr0w2+8N5s24Ko8ikWjRxf8DmLve8kc=";
+  cargoHash = "sha256-j07BZ9JsY6UG9eXVxdn0CTWU8j/cGNA9lXrDsdF40lM=";
+
+  separateDebugInfo = true;
+  __structuredAttrs = true;
 
   nativeBuildInputs = [
     just
     libcosmicAppHook
     nasm
+  ];
+
+  buildInputs = [
+    dav1d
   ];
 
   dontUseJustBuild = true;

@@ -8,6 +8,7 @@
   openssl,
   cyrus_sasl,
   libnsl,
+  lmdb,
   coreutils,
   findutils,
   gnugrep,
@@ -39,6 +40,7 @@ let
       "-DUSE_CYRUS_SASL"
       "-I${cyrus_sasl'.dev}/include/sasl"
       "-DHAS_DB_BYPASS_MAKEDEFS_CHECK"
+      "-DHAS_LMDB"
       # Fix build with gcc15, no upstream fix for stable releases:
       # https://www.mail-archive.com/postfix-devel@postfix.org/msg01270.html
       "-std=gnu17"
@@ -58,11 +60,12 @@ let
   );
   auxlibs = lib.concatStringsSep " " (
     [
+      "-lcrypto"
       "-ldb"
+      "-llmdb"
       "-lnsl"
       "-lresolv"
       "-lsasl2"
-      "-lcrypto"
       "-lssl"
     ]
     ++ lib.optional withPgSQL "-lpq"
@@ -75,11 +78,11 @@ let
 in
 stdenv.mkDerivation (finalAttrs: {
   pname = "postfix";
-  version = "3.11.1";
+  version = "3.11.6";
 
   src = fetchurl {
     url = "http://ftp.porcupine.org/mirrors/postfix-release/official/postfix-${finalAttrs.version}.tar.gz";
-    hash = "sha256-ZZJlYG7ZtiQpZLbUSiqvXmB9j7mtJUECekoyDd+4ncE=";
+    hash = "sha256-uadIcFscqwpK/L5C+TTIKjOzQroyKQF/tQjHFwAHjQc=";
   };
 
   nativeBuildInputs = [
@@ -87,11 +90,12 @@ stdenv.mkDerivation (finalAttrs: {
     m4
   ];
   buildInputs = [
-    db
-    openssl
     cyrus_sasl'
+    db
     icu
     libnsl
+    lmdb
+    openssl
     pcre2
   ]
   ++ lib.optional withPgSQL libpq

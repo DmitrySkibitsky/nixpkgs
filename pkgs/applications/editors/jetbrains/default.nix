@@ -5,18 +5,28 @@
   callPackage,
 
   python3,
+  jetbrains,
 
-  jdk,
   vmopts ? null,
   forceWayland ? false,
 }:
 
 let
-  mkJetBrainsProduct = callPackage ./builder/default.nix { inherit jdk forceWayland vmopts; };
-  mkJetBrainsSource = callPackage ./source/build.nix { };
+  jetbrainsBuilder =
+    jdk:
+    callPackage ./builder/default.nix {
+      inherit jdk forceWayland vmopts;
+    };
 
   mkSrcIde =
-    path: extras: callPackage path ({ inherit mkJetBrainsProduct mkJetBrainsSource; } // extras);
+    path: extras:
+    callPackage path (
+      {
+        mkJetBrainsProduct = jetbrainsBuilder jetbrains.jdk;
+        mkJetBrainsSource = callPackage ./source/build.nix { };
+      }
+      // extras
+    );
 
   _idea-oss = mkSrcIde ./ides/idea-oss.nix { };
 
@@ -25,7 +35,7 @@ let
     path: extras:
     callPackage path (
       {
-        inherit mkJetBrainsProduct;
+        mkJetBrainsProduct = jetbrainsBuilder jetbrains.jdk-no-jcef;
         libdbm = _idea-oss.libdbm;
         fsnotifier = _idea-oss.fsnotifier;
       }
@@ -58,9 +68,9 @@ let
   patchSharedLibs = lib.optionalString stdenv.hostPlatform.isLinux ''
     ls -d \
       $out/*/bin/*/linux/*/lib/liblldb.so \
-      $out/*/bin/*/linux/*/lib/python3.8/lib-dynload/* \
+      $out/*/bin/*/linux/*/lib/python3.*/lib-dynload/* \
       $out/*/plugins/*/bin/*/linux/*/lib/liblldb.so \
-      $out/*/plugins/*/bin/*/linux/*/lib/python3.8/lib-dynload/* |
+      $out/*/plugins/*/bin/*/linux/*/lib/python3.*/lib-dynload/* |
     xargs patchelf \
       --replace-needed libssl.so.10 libssl.so \
       --replace-needed libssl.so.1.1 libssl.so \

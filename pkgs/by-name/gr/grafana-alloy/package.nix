@@ -13,20 +13,25 @@
   lld,
   useLLD ? stdenv.hostPlatform.isArmv7,
 }:
+
+let
+  beylaVersion = "v3.9.8";
+in
+
 buildGoModule (finalAttrs: {
   pname = "grafana-alloy";
-  version = "1.14.1";
+  version = "1.17.1";
 
   src = fetchFromGitHub {
     owner = "grafana";
     repo = "alloy";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-zgbbbuq+sb+nU1vgzaxEHGY77k+TXFrlvcvs/NSqQAM=";
+    hash = "sha256-4HjOerOe+v8GkKgID/oBm5Rt7nQiHjucAQkSYGY5zZs=";
   };
 
   npmDeps = fetchNpmDeps {
     src = "${finalAttrs.src}/internal/web/ui";
-    hash = "sha256-GT0yisPn+3FCtWL3he0i5zPMlaWNparQDefU69G4Yis=";
+    hash = "sha256-eGyKXsZzyDovsMY2U1uAOn22nyRTYGJT+kEh61857Ls=";
   };
 
   frontend = buildNpmPackage {
@@ -49,12 +54,18 @@ buildGoModule (finalAttrs: {
 
   patchPhase = ''
     cp -av ${finalAttrs.frontend}/share internal/web/ui/dist
+
+    goSumBeylaVersion="$(grep beyla go.sum | head -1 | cut -d ' ' -f2)"
+    if [[ "$goSumBeylaVersion" != "${beylaVersion}" ]];then
+      echo "beyla version in go.sum ($goSumBeylaVersion) doesn't match the one set in the expression (${beylaVersion}), needs updating."
+      exit 1
+    fi
   '';
 
   modRoot = "collector";
 
   proxyVendor = true;
-  vendorHash = "sha256-A1mbMmpUxg5T7//X5PL1CPGB1OMPhertFvz4sPFTgOg=";
+  vendorHash = "sha256-C6qVdSfTwmjseCjXKn5f9Q9mn3EBg31CQlLk5QY4YRY=";
 
   subPackages = [ "." ];
 
@@ -66,10 +77,12 @@ buildGoModule (finalAttrs: {
     "-X github.com/grafana/alloy/internal/build.Revision=v${finalAttrs.version}"
     "-X github.com/grafana/alloy/internal/build.BuildUser=nix@nixpkgs"
     "-X github.com/grafana/alloy/internal/build.BuildDate=1970-01-01T00:00:00Z"
+    "-X github.com/grafana/beyla/pkg/buildinfo=${beylaVersion}"
   ];
 
   tags = [
     "embedalloyui"
+    "gore2regex"
     "netgo"
   ]
   ++ lib.optionals stdenv.hostPlatform.isLinux [
@@ -91,14 +104,15 @@ buildGoModule (finalAttrs: {
   ]
   ++ lib.optionals useLLD [ lld ];
 
-  postInstall = lib.optionalString (stdenv.buildPlatform.canExecute stdenv.hostPlatform) ''
-    mv -v $out/bin/otel_engine $out/bin/alloy
+  postInstall =
+    "mv -v $out/bin/otel_engine $out/bin/alloy"
+    + lib.optionalString (stdenv.buildPlatform.canExecute stdenv.hostPlatform) ''
 
-    installShellCompletion --cmd alloy \
-      --bash <($out/bin/alloy completion bash) \
-      --fish <($out/bin/alloy completion fish) \
-      --zsh <($out/bin/alloy completion zsh)
-  '';
+      installShellCompletion --cmd alloy \
+        --bash <($out/bin/alloy completion bash) \
+        --fish <($out/bin/alloy completion fish) \
+        --zsh <($out/bin/alloy completion zsh)
+    '';
 
   doInstallCheck = true;
   nativeInstallCheckInputs = [ versionCheckHook ];

@@ -13,14 +13,14 @@ in
 python.pkgs.toPythonModule (
   python.pkgs.buildPythonApplication rec {
     pname = "searxng";
-    version = "0-unstable-2026-03-18";
+    version = "0-unstable-2026-09-01";
     pyproject = true;
 
     src = fetchFromGitHub {
       owner = "searxng";
       repo = "searxng";
-      rev = "3810dc9d1c38b44d4e14eaf502222e7dc72f3e17";
-      hash = "sha256-EoKClu4K9oYLjzG+zhglRDeIN5PXlEnvhsyeVdRTH/w=";
+      rev = "79c8ffe0da5d75e48dbd55d505adab5d0ca554b9";
+      hash = "sha256-lxxO1wcZ9RDnw/28mVaT4oGGWkw5yEaeagcCdnlEInI=";
     };
 
     nativeBuildInputs = with python.pkgs; [ pythonRelaxDepsHook ];
@@ -30,7 +30,7 @@ python.pkgs.toPythonModule (
     preBuild =
       let
         versionString = lib.concatStringsSep "." (
-          builtins.tail (lib.splitString "-" (lib.removePrefix "0-" version))
+          map (lib.removePrefix "0") (builtins.tail (lib.splitString "-" (lib.removePrefix "0-" version)))
         );
         commitAbbrev = builtins.substring 0 8 src.rev;
       in

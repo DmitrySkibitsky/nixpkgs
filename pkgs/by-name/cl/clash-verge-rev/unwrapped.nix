@@ -13,7 +13,7 @@
   moreutils,
   nodejs,
   pkg-config,
-  pnpm_9,
+  pnpm_11,
   fetchPnpmDeps,
   pnpmConfigHook,
 
@@ -37,19 +37,14 @@ rustPlatform.buildRustPackage {
       version
       src
       ;
-    pnpm = pnpm_9;
-    fetcherVersion = 3;
+    pnpm = pnpm_11;
+    fetcherVersion = 4;
     hash = pnpm-hash;
   };
 
   env = {
     OPENSSL_NO_VENDOR = 1;
   };
-
-  cargoPatches = [
-    # Duplicate versions of tao-macros make fetchCargoVendor fail, keep one of them.
-    ./patch-cargo-lock.patch
-  ];
 
   postPatch = ''
     # We disable the option to try to use the bleeding-edge version of mihomo
@@ -69,9 +64,7 @@ rustPlatform.buildRustPackage {
 
     substituteInPlace $cargoDepsCopy/*/sysproxy-*/src/linux.rs \
       --replace-fail '"gsettings"' '"${glib.bin}/bin/gsettings"' \
-      --replace-fail '"kreadconfig5"' '"${libsForQt5.kconfig}/bin/kreadconfig5"' \
       --replace-fail '"kreadconfig6"' '"${kdePackages.kconfig}/bin/kreadconfig6"' \
-      --replace-fail '"kwriteconfig5"' '"${libsForQt5.kconfig}/bin/kwriteconfig5"' \
       --replace-fail '"kwriteconfig6"' '"${kdePackages.kconfig}/bin/kwriteconfig6"'
 
     # this file tries to override the linker used when compiling for certain platforms
@@ -94,7 +87,7 @@ rustPlatform.buildRustPackage {
     nodejs
     pkg-config
     pnpmConfigHook
-    pnpm_9
+    pnpm_11
   ];
 
   buildInputs = [

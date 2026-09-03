@@ -1,15 +1,23 @@
 {
   lib,
   stdenv,
+  callPackage,
   rustPlatform,
   fetchFromGitHub,
   installShellFiles,
-  cargo,
+  bubblewrap,
   clang,
   cmake,
   gitMinimal,
   libcap,
   libclang,
+  librusty_v8 ? callPackage ./librusty_v8.nix {
+    inherit (callPackage ./fetchers.nix { }) fetchLibrustyV8;
+  },
+  librusty_v8_src_binding ? callPackage ./librusty_v8_src_binding.nix {
+    inherit (callPackage ./fetchers.nix { }) fetchLibrustyV8SrcBinding;
+  },
+  lld,
   makeBinaryWrapper,
   nix-update-script,
   pkg-config,
@@ -17,33 +25,45 @@
   ripgrep,
   versionCheckHook,
   installShellCompletions ? stdenv.buildPlatform.canExecute stdenv.hostPlatform,
+  _experimental-update-script-combinators,
 }:
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "codex";
-  version = "0.115.0";
+  version = "0.151.0";
 
   src = fetchFromGitHub {
     owner = "openai";
     repo = "codex";
     tag = "rust-v${finalAttrs.version}";
-    hash = "sha256-8l5OZQS6L1uhVpqZZGx2O3Xt6qTaTAYDR5XWOydTVuQ=";
+    hash = "sha256-snrzA4W+vLqpPk3MS4xw9SszK1byCKo6ERz3JDgRZdA=";
   };
 
   sourceRoot = "${finalAttrs.src.name}/codex-rs";
 
-  # TODO: Drop workaround once PR #486983 reaches master.
-  depsExtraArgs = {
-    nativeBuildInputs = [ cargo ];
-    postBuild = ''
-      # delete all Cargo.toml files for which `cargo metadata` fails
-      shopt -s globstar
-      for manifest_path in "$out"/**/Cargo.toml; do
-        cargo metadata --format-version 1 --no-deps --manifest-path "$manifest_path" >/dev/null || rm -v "$manifest_path"
-      done
-    '';
-  };
+  cargoHash = "sha256-r6ox0dUH1OBkD8sQApfANrGbWxKXLv2UNLJZzciJc3I=";
 
-  cargoHash = "sha256-7lp6QslpGPXtDXVvlg/+m6LrLV/Ygd1FcjtlMviE3oM=";
+  __structuredAttrs = true;
+
+  # Match upstream's release build for the codex binary, plus its
+  # codex-code-mode-host runtime companion for out-of-process V8 execution.
+  cargoBuildFlags = [
+    "--package"
+    "codex-cli"
+    "--package"
+    "codex-code-mode-host"
+  ];
+  cargoCheckFlags = [
+    "--package"
+    "codex-cli"
+    "--package"
+    "codex-code-mode-host"
+  ];
+
+  postPatch = ''
+    substituteInPlace Cargo.toml \
+      --replace-fail 'lto = "thin"' "" \
+      --replace-fail 'codegen-units = 4' ""
+  '';
 
   nativeBuildInputs = [
     clang
@@ -76,6 +96,13 @@ rustPlatform.buildRustPackage (finalAttrs: {
         "-Wno-error=character-conversion"
       ]
     );
+    RUSTY_V8_ARCHIVE = librusty_v8;
+    RUSTY_V8_SRC_BINDING_PATH = librusty_v8_src_binding;
+  }
+  // lib.optionalAttrs stdenv.hostPlatform.isDarwin {
+    # Link with lld on Darwin. nixpkgs' classic open-source ld64 fails to insert
+    # ARM64 branch thunks for this binary, producing `b(l) ARM64 branch out of range`.
+    NIX_CFLAGS_LINK = "-fuse-ld=${lib.getExe' lld "ld64.lld"}";
   };
 
   # NOTE: part of the test suite requires access to networking, local shells,
@@ -94,21 +121,24 @@ rustPlatform.buildRustPackage (finalAttrs: {
   '';
 
   postFixup = ''
-    wrapProgram $out/bin/codex --prefix PATH : ${lib.makeBinPath [ ripgrep ]}
+    wrapProgram $out/bin/codex --prefix PATH : ${
+      lib.makeBinPath ([ ripgrep ] ++ lib.optionals stdenv.hostPlatform.isLinux [ bubblewrap ])
+    }
   '';
 
   doInstallCheck = true;
   nativeInstallCheckInputs = [ versionCheckHook ];
 
-  passthru = {
-    updateScript = nix-update-script {
+  passthru.updateScript = _experimental-update-script-combinators.sequence [
+    (nix-update-script {
       extraArgs = [
         "--use-github-releases"
         "--version-regex"
         "^rust-v(\\d+\\.\\d+\\.\\d+)$"
       ];
-    };
-  };
+    })
+    ./update-librusty.sh
+  ];
 
   meta = {
     description = "Lightweight coding agent that runs in your terminal";

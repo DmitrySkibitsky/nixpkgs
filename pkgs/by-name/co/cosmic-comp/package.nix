@@ -5,7 +5,7 @@
   fetchFromGitHub,
   libcosmicAppHook,
   pkg-config,
-  libdisplay-info_0_2,
+  libdisplay-info_0_3,
   libgbm,
   libinput,
   pixman,
@@ -20,19 +20,23 @@
 
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "cosmic-comp";
-  version = "1.0.8";
+  version = "1.6.0";
 
   # nixpkgs-update: no auto update
   src = fetchFromGitHub {
     owner = "pop-os";
     repo = "cosmic-comp";
     tag = "epoch-${finalAttrs.version}";
-    hash = "sha256-TGTKUF7rYZ/Koem4rPBFYHatzhhqpWe/1WmAqlY3odg=";
+    hash = "sha256-6iV0ZxSSw+2t5qUvEzM/W4+/erwx03TsOwKb64P8CrE=";
   };
 
-  cargoHash = "sha256-MI8cJzjZd2UeWBESu8xEDYQv0Oa4PRhc4pOCN0zDNO4=";
+  cargoHash = "sha256-b8X5X6aQZMa8X189812syMBPvjJDUbJUpx+jiar8fzQ=";
+
+  # Only default feature is systemd
+  buildNoDefaultFeatures = !useSystemd;
 
   separateDebugInfo = true;
+  __structuredAttrs = true;
 
   nativeBuildInputs = [
     libcosmicAppHook
@@ -40,7 +44,7 @@ rustPlatform.buildRustPackage (finalAttrs: {
   ];
 
   buildInputs = [
-    libdisplay-info_0_2
+    libdisplay-info_0_3
     libgbm
     libinput
     pixman
@@ -48,9 +52,6 @@ rustPlatform.buildRustPackage (finalAttrs: {
     udev
   ]
   ++ lib.optional useSystemd systemd;
-
-  # Only default feature is systemd
-  buildNoDefaultFeatures = !useSystemd;
 
   makeFlags = [
     "prefix=${placeholder "out"}"

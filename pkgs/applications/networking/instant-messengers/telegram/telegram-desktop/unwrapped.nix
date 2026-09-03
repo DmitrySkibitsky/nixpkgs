@@ -6,8 +6,8 @@
   pkg-config,
   cmake,
   ninja,
-  clang,
   python3,
+  qtshadertools,
   tdlib,
   tg_owt ? callPackage ./tg_owt.nix { inherit stdenv; },
   qtbase,
@@ -15,11 +15,11 @@
   qtwayland,
   kcoreaddons,
   lz4,
-  xxHash,
-  ffmpeg_6,
+  xxhash,
+  ffmpeg,
   protobuf,
   openal-soft,
-  minizip-ng,
+  minizip-ng-compat,
   range-v3,
   tl-expected,
   hunspell,
@@ -28,6 +28,8 @@
   microsoft-gsl,
   boost,
   ada,
+  cmark-gfm,
+  libfido2,
   libavif,
   libheif,
   libjxl,
@@ -45,14 +47,14 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "telegram-desktop-unwrapped";
-  version = "6.6.2";
+  version = "7.0.9";
 
   src = fetchFromGitHub {
     owner = "telegramdesktop";
     repo = "tdesktop";
     rev = "v${finalAttrs.version}";
     fetchSubmodules = true;
-    hash = "sha256-sMg7h+he+mlqTu8wSLAsSJzCmwTX3t+suTEY77RH+aI=";
+    hash = "sha256-zpGfubIZtTmLjAgxYGcMy2N3Xlf9NOppcxsMSUS/KEA=";
   };
 
   nativeBuildInputs = [
@@ -60,10 +62,9 @@ stdenv.mkDerivation (finalAttrs: {
     cmake
     ninja
     python3
+    qtshadertools
   ]
   ++ lib.optionals stdenv.hostPlatform.isLinux [
-    # to build bundled libdispatch
-    clang
     gobject-introspection
   ];
 
@@ -71,10 +72,10 @@ stdenv.mkDerivation (finalAttrs: {
     qtbase
     qtsvg
     lz4
-    xxHash
-    ffmpeg_6
+    xxhash
+    ffmpeg
     openal-soft
-    minizip-ng
+    minizip-ng-compat
     range-v3
     tl-expected
     rnnoise
@@ -82,6 +83,8 @@ stdenv.mkDerivation (finalAttrs: {
     microsoft-gsl
     boost
     ada
+    cmark-gfm
+    libfido2
     (tdlib.override { tde2eOnly = true; })
   ]
   ++ lib.optionals stdenv.hostPlatform.isLinux [
@@ -104,6 +107,8 @@ stdenv.mkDerivation (finalAttrs: {
     # We're allowed to used the API ID of the Snap package:
     (lib.cmakeFeature "TDESKTOP_API_ID" "611335")
     (lib.cmakeFeature "TDESKTOP_API_HASH" "d524b414d21f4d37f08684c1df41ac9c")
+    # swift 6 is not available in nixpkgs
+    (lib.cmakeBool "DESKTOP_APP_DISABLE_SWIFT6" true)
   ];
 
   installPhase = lib.optionalString stdenv.hostPlatform.isDarwin ''

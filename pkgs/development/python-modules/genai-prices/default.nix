@@ -7,20 +7,20 @@
   uv-build,
 
   # dependencies
-  httpx,
+  httpx2,
   pydantic,
 }:
 
 buildPythonPackage (finalAttrs: {
   pname = "genai-prices";
-  version = "0.0.55";
+  version = "0.1.3";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "pydantic";
     repo = "genai-prices";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-FxHBVroKC9tgYJ+a429cnv7UVWMBoeTX+BEah7eD9Us=";
+    hash = "sha256-9fXJ+ZcQ7v2EjRx5LQVNsOSK32T4h0cAp4dKTTDRlpo=";
   };
 
   sourceRoot = "${finalAttrs.src.name}/packages/python";
@@ -30,7 +30,7 @@ buildPythonPackage (finalAttrs: {
   ];
 
   dependencies = [
-    httpx
+    httpx2
     pydantic
   ];
 

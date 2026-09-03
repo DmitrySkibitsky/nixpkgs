@@ -11,16 +11,16 @@
 }:
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "biome";
-  version = "2.4.7";
+  version = "2.5.11";
 
   src = fetchFromGitHub {
     owner = "biomejs";
     repo = "biome";
     rev = "@biomejs/biome@${finalAttrs.version}";
-    hash = "sha256-Ca1a8Q6YJpGUMZ3cbQkIndmeE10V7myB/3EQ4r3fa1o=";
+    hash = "sha256-8xiYWucmPrvvizvsAo1swmrJPiSdlvTdynM2c/+rJnI=";
   };
 
-  cargoHash = "sha256-z2JtrZkvlvfQGhhY3T3PIiXUq53bSb7Z8rgvGZPzPag=";
+  cargoHash = "sha256-cy29RkqgU1ok/MNc/KK7svRAr/vq/ntaQT43yJ5mrrA=";
 
   nativeBuildInputs = [ pkg-config ];
 
@@ -72,7 +72,10 @@ rustPlatform.buildRustPackage (finalAttrs: {
     unset BIOME_VERSION
   '';
 
-  passthru.updateScript = nix-update-script { };
+  passthru = {
+    updateScript = nix-update-script { };
+    jsonschema = "${finalAttrs.finalPackage}/share/schema.json";
+  };
 
   meta = {
     description = "Toolchain of the web";

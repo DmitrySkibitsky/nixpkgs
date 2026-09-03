@@ -24,6 +24,7 @@ assert lib.assertMsg (
   closureInfo,
   runCommand,
   meson,
+  bash,
   bison,
   boehmgc,
   boost,
@@ -35,8 +36,10 @@ assert lib.assertMsg (
   cargo,
   curl,
   cmake,
+  darwin,
   doxygen,
   editline,
+  fetchpatch2,
   flex,
   git,
   gtest,
@@ -119,11 +122,33 @@ let
           [project options]
           builtin-dep-closure = @deps@
         '';
-        passAsFile = [ "input" ];
+        __structuredAttrs = true;
       }
       ''
-        substitute $inputPath $out --replace-fail @deps@ "$(cat ${deps})"
+        printf "%s" "$input" > $out
+        substituteInPlace $out --replace-fail @deps@ "$(cat ${deps})"
       '';
+
+  # curl 8.21.0 /somehow/ breaks Lix unit tests.
+  # See https://github.com/NixOS/nixpkgs/issues/534713
+  # FIXME remove once fixed
+  curl-fixed = curl.overrideAttrs (
+    {
+      patches ? [ ],
+      ...
+    }:
+    {
+      patches = patches ++ [
+        # See https://github.com/curl/curl/commit/2a2104f3cff44bb28bb570a093be52bbeeed8f23
+        (fetchpatch2 {
+          name = "fix-wakeup-consumption-revert.patch";
+          url = "https://github.com/curl/curl/commit/2a2104f3cff44bb28bb570a093be52bbeeed8f23.patch";
+          hash = "sha256-dkwr1ZaR7XB408JxeIKhuHxJrlwf3J01jL6lnOLXo1I=";
+          revert = true;
+        })
+      ];
+    }
+  );
 in
 # gcc miscompiles coroutines at least until 13.2, possibly longer
 # do not remove this check unless you are sure you (or your users) will not report bugs to Lix upstream about GCC miscompilations.
@@ -241,14 +266,14 @@ stdenv.mkDerivation (finalAttrs: {
   ++ lib.optionals stdenv.hostPlatform.isLinux [ util-linuxMinimal ]
   ++ lib.optionals (lib.versionAtLeast version "2.94") [ zstd ]
   ++ lib.optionals (withPlugins && finalAttrs.doInstallCheck) [
-    curl
+    curl-fixed
   ];
 
   buildInputs = [
     boost
     brotli
     bzip2
-    curl
+    curl-fixed
     capnproto
     editline
     openssl
@@ -287,6 +312,7 @@ stdenv.mkDerivation (finalAttrs: {
 
   propagatedBuildInputs = [
     boehmgc
+    boost
     nlohmann_json
   ];
 
@@ -367,8 +393,26 @@ stdenv.mkDerivation (finalAttrs: {
     lib.optionals
       (stdenv.hostPlatform.isLinux && finalAttrs.doInstallCheck && lib.versionAtLeast version "2.95")
       [
-        (lib.mesonOption "build-test-env" "${pkgsStatic.busybox}/bin")
+        (lib.mesonOption "build-test-env" (
+          lib.makeBinPath [
+            pkgsStatic.busybox
+            pkgsStatic.acl
+          ]
+        ))
         (lib.mesonOption "build-test-shell" "${pkgsStatic.bash}/bin")
+      ]
+  ++
+    lib.optionals
+      (stdenv.hostPlatform.isDarwin && finalAttrs.doInstallCheck && lib.versionAtLeast version "2.95")
+      [
+        (lib.mesonOption "build-test-env" (
+          lib.makeBinPath [
+            darwin.file_cmds
+            darwin.shell_cmds
+            darwin.text_cmds
+          ]
+        ))
+        (lib.mesonOption "build-test-shell" "${bash}/bin")
       ]
   ++ lib.optionals (lib.versionAtLeast version "2.95") [
     "--${

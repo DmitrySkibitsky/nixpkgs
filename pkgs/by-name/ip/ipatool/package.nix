@@ -5,20 +5,27 @@
   nix-update-script,
   testers,
   ipatool,
+  writableTmpDirAsHomeHook,
 }:
 
 buildGoModule (finalAttrs: {
   pname = "ipatool";
-  version = "2.2.0";
+  version = "2.3.2";
 
   src = fetchFromGitHub {
     owner = "majd";
     repo = "ipatool";
     rev = "v${finalAttrs.version}";
-    hash = "sha256-z6f5PNxAH+8mS2kWjhST0LFhwTR01m7rR5O95ee+p2E=";
+    hash = "sha256-jIdjTDs/g41j805vkC1PqLvChtzB055JYmd4GbEHNZU=";
   };
 
-  vendorHash = "sha256-f6mXTePiM5kZUdrYqvbN5pyNp1OGNMeJZMUJ3pvaRrc=";
+  vendorHash = "sha256-HNus5wZUmiuVVdDj4i9X9sO8iyccrq4h//s0zkQNYjY=";
+
+  # Fixes "import lookup disabled by -mod=vendor" for onepassword-sdk-go on macOS
+  proxyVendor = true;
+
+  # Fixes "unable to open output file '/homeless-shelter/.cache/clang/ModuleCache/" on macOS
+  nativeBuildInputs = [ writableTmpDirAsHomeHook ];
 
   ldflags = [
     "-s"

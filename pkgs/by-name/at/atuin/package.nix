@@ -1,37 +1,54 @@
 {
   lib,
-  stdenv,
   fetchFromGitHub,
   installShellFiles,
-  rustPlatform,
-  nixosTests,
   nix-update-script,
+  nixosTests,
+  openssl,
+  pkg-config,
+  rustPlatform,
+  stdenv,
 }:
 
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "atuin";
-  version = "18.13.3";
+  version = "18.19.0";
 
   src = fetchFromGitHub {
     owner = "atuinsh";
     repo = "atuin";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-hLt6CDHEPV8BVpOADVn4bLNcBz89eC2jKtIexHG0yAY=";
+    hash = "sha256-P+57HkZ2Xl2sFBNw8zaaX91DF47DVQQswXAziu5h4NM=";
   };
 
-  cargoHash = "sha256-VYwzMnfc/a4Sghmr5oMfhvoMkaWlY4w4e4Flu8MWQg0=";
+  cargoHash = "sha256-15H0BwkJZ8Khu6H9K31VBxYRy8b/KhK32/b5kaxmRjw=";
+
+  postPatch = ''
+    substituteInPlace crates/atuin-pty-proxy/tests/{fd_pressure,subscriber}.rs \
+      --replace-fail "/bin/cat" "cat"
+  '';
 
   # atuin's default features include 'check-updates', which do not make sense
   # for distribution builds. List all other default features.
+  # see https://github.com/atuinsh/atuin/blob/main/crates/atuin/Cargo.toml#L42
   buildNoDefaultFeatures = true;
   buildFeatures = [
+    "ai"
     "client"
-    "sync"
     "clipboard"
     "daemon"
+    "pty-proxy"
+    "sync"
   ];
 
-  nativeBuildInputs = [ installShellFiles ];
+  nativeBuildInputs = [
+    installShellFiles
+    pkg-config
+  ];
+
+  buildInputs = [
+    openssl
+  ];
 
   postInstall = lib.optionalString (stdenv.buildPlatform.canExecute stdenv.hostPlatform) ''
     installShellCompletion --cmd atuin \
@@ -43,6 +60,7 @@ rustPlatform.buildRustPackage (finalAttrs: {
   checkFlags = [
     # tries to make a network access
     "--skip=registration"
+    "--skip=api_client"
     # No such file or directory (os error 2)
     "--skip=sync"
     # PermissionDenied (Operation not permitted)
@@ -56,7 +74,7 @@ rustPlatform.buildRustPackage (finalAttrs: {
 
   passthru = {
     tests = {
-      inherit (nixosTests) atuin;
+      inherit (nixosTests) atuin atuin-programs;
     };
     updateScript = nix-update-script { };
   };

@@ -28,17 +28,31 @@ let
       extraPatches = [
         # The file to be patched is different from firefox's `no-buildconfig-ffx90.patch`.
         (if lib.versionOlder version "140" then ./no-buildconfig.patch else ./no-buildconfig-tb140.patch)
-      ];
+      ]
+      ++
+        lib.optional (lib.versionAtLeast version "154" && lib.versionOlder version "154.0.1")
+          (fetchpatch2 {
+            # Fix Success macros colliding: https://bugzilla.mozilla.org/show_bug.cgi?id=2065007
+            url = "https://github.com/mozilla-firefox/firefox/commit/f0b76eba072821d62e74ebdbd8da9243a2ce3b84.patch";
+            hash = "sha256-PCTmv1ZO7ce4q5fp+WPmy5Wga5OMY4hNzqIZ7iYCcp4=";
+          });
       # FIXME: let's hope that upstream will fix this soon and we can drop this hack again.
-      # https://bugzilla.mozilla.org/show_bug.cgi?id=2006630
-      extraPostPatch = lib.optionalString (lib.versionAtLeast version "147") ''
-        find . -name .cargo-checksum.json | xargs sed 's/"[^"]*\.gitmodules":"[a-z0-9]*",//g' -i
-      '';
+      # https://bugzilla.mozilla.org/show_bug.cgi?id=2040877
+      extraPostPatch =
+        lib.optionalString (lib.versionAtLeast version "151" && lib.versionOlder version "152") ''
+          echo https://hg.mozilla.org/releases/comm-release/rev/becfb8fb2c70f1603882a2787e2170d5d8013949 >> sourcestamp.txt
+          echo https://hg.mozilla.org/releases/mozilla-release/rev/fc12dc911f904307729760a817deb829cbf8feb4 >> sourcestamp.txt
+        ''
+        # https://bugzilla.mozilla.org/show_bug.cgi?id=2006630
+        + lib.optionalString (lib.versionAtLeast version "140.8" && lib.versionOlder version "151") ''
+          find . -name .cargo-checksum.json | xargs sed 's/"[^"]*\.gitmodules":"[a-z0-9]*",//g' -i
+        '';
 
       meta = {
         changelog = "https://www.thunderbird.net/en-US/thunderbird/${version}/releasenotes/";
         description = "Full-featured e-mail client";
-        homepage = "https://thunderbird.net/";
+        homepage = "https://www.thunderbird.net/";
+        donationPage = "https://www.thunderbird.net/donate/";
         mainProgram = "thunderbird";
         maintainers = with lib.maintainers; [
           booxter # darwin
@@ -53,20 +67,26 @@ let
         license = lib.licenses.mpl20;
       };
     }).override
-      {
-        geolocationSupport = false;
-        webrtcSupport = false;
+      (
+        {
+          enableLocation = false;
+          enableWebRTC = false;
 
-        pgoSupport = false; # console.warn: feeds: "downloadFeed: network connection unavailable"
-      };
+          enablePGO = false; # console.warn: feeds: "downloadFeed: network connection unavailable"
+        }
+        // lib.optionalAttrs (lib.versionAtLeast version "149") {
+          # https://bugzilla.mozilla.org/show_bug.cgi?id=2025767
+          enableCrashReporter = false;
+        }
+      );
 
 in
 rec {
   thunderbird = thunderbird-latest;
 
   thunderbird-latest = common {
-    version = "148.0.1";
-    sha512 = "4f6e721b0858bece740f04744d10d8bb0b0673d2ebfe5624d3797e28e394510a8518dc31fc6a121ba7ed8a5a44953efefe3a74071e9f967c22be17cee45b3faf";
+    version = "155.0";
+    sha512 = "fe0247ac50d2741a49517fabe729dc990a66e7044f450e4fe6871b663096bcd15f22ed83eea0557106d38eee34e464fead5a7567d0906995ff2a945fae64b60c";
 
     updateScript = callPackage ./update.nix {
       attrPath = "thunderbirdPackages.thunderbird-latest";
@@ -74,13 +94,26 @@ rec {
   };
 
   # Eventually, switch to an updateScript without versionPrefix hardcoded...
-  thunderbird-esr = thunderbird-140;
+  thunderbird-esr = thunderbird-153;
+
+  thunderbird-153 = common {
+    applicationName = "Thunderbird ESR";
+
+    version = "153.1.1esr";
+    sha512 = "a0e26fb0c4c6c97ab2cc0dca0f122de9f149e70ed888010dd79192f838caa267b80bdc9e33fdcd9d8cbb3efd7ac8c63ca5b36058a5c40fe1e9f638387e7f20de";
+
+    updateScript = callPackage ./update.nix {
+      attrPath = "thunderbirdPackages.thunderbird-153";
+      versionPrefix = "153";
+      versionSuffix = "esr";
+    };
+  };
 
   thunderbird-140 = common {
     applicationName = "Thunderbird ESR";
 
-    version = "140.7.2esr";
-    sha512 = "513bcaa496f987d0f3906aeb6fe3ea651331470646b0c58479c91bb2c8eb52e389bc8aa646437a03b611ab78bda1df7252545960ffe38086d1fc462e65421819";
+    version = "140.14.0esr";
+    sha512 = "4c95b1ca3fc7f6429b2360a7e732635bdfb60927622a7da4d8af9ca2abd550611b91763c587cddad5d51c0dd4e905ba8e106da3cd21591a1bec3dba1b9a2502d";
 
     updateScript = callPackage ./update.nix {
       attrPath = "thunderbirdPackages.thunderbird-140";

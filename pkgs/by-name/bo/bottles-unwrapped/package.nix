@@ -9,6 +9,7 @@
   wrapGAppsHook4,
   appstream-glib,
   desktop-file-utils,
+  fvs2,
   librsvg,
   gtk4,
   gtksourceview5,
@@ -24,28 +25,31 @@
   gamescope,
   mangohud,
   vkbasalt-cli,
+  vulkan-tools,
   vmtouch,
   libportal,
+  libportal-gtk4,
+  obs-studio-plugins,
   nix-update-script,
   removeWarningPopup ? false,
+  withObsVkCapture ? false,
 }:
 
 python3Packages.buildPythonApplication (finalAttrs: {
   pname = "bottles-unwrapped";
-  version = "62.0";
+  version = "65.4";
 
   src = fetchFromGitHub {
     owner = "bottlesdevs";
     repo = "bottles";
     tag = finalAttrs.version;
-    hash = "sha256-UqK5ULFgNPe9r2xFolU1R5LnlD3kLgBK0qGl48elEwM=";
+    hash = "sha256-59Duh4E1kMShhk/iH/SBhpmFfUjYzRClNuWqoDSbTeM=";
   };
 
   patches = [
     ./vulkan_icd.patch
     ./redirect-bugtracker.patch
     ./remove-flatpak-check.patch
-    ./terminal.patch # Needed for `Launch with Terminal`
   ]
   ++ (
     if removeWarningPopup then
@@ -74,6 +78,7 @@ python3Packages.buildPythonApplication (finalAttrs: {
     gtksourceview5
     libadwaita
     libportal
+    libportal-gtk4
   ];
 
   propagatedBuildInputs =
@@ -87,7 +92,6 @@ python3Packages.buildPythonApplication (finalAttrs: {
       icoextract
       patool
       pathvalidate
-      fvs
       orjson
       pycairo
       pygobject3
@@ -104,17 +108,20 @@ python3Packages.buildPythonApplication (finalAttrs: {
       xdpyinfo
       imagemagick
       vkbasalt-cli
+      vulkan-tools
 
       gamemode
       gamescope
       mangohud
       vmtouch
+      fvs2
 
       # Undocumented (subprocess.Popen())
       lsb-release
       pciutils
       procps
-    ];
+    ]
+    ++ lib.optional withObsVkCapture obs-studio-plugins.obs-vkcapture;
 
   pyproject = false;
   dontWrapGApps = true; # prevent double wrapping

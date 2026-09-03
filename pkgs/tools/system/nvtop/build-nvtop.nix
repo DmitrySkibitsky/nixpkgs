@@ -4,10 +4,10 @@
   fetchFromGitHub,
   cmake,
   gtest,
-  cudatoolkit,
+  cudaPackages,
   libdrm,
   ncurses,
-  testers,
+  versionCheckHook,
   udev,
   addDriverRunpath,
   amd ? false,
@@ -44,12 +44,15 @@ stdenv.mkDerivation (finalAttrs: {
   pname = "nvtop";
   version = "3.3.2";
 
+  strictDeps = true;
+  __structuredAttrs = true;
+
   # between generation of multiple update PRs for each package flavor and manual updates I choose manual updates
   # nixpkgs-update: no auto update
   src = fetchFromGitHub {
     owner = "Syllo";
     repo = "nvtop";
-    rev = finalAttrs.version;
+    tag = finalAttrs.version;
     hash = "sha256-w3g/9VbZz1qrEMaBBHEf9Y93z0vo8LbWnENL2wEEaSw=";
   };
 
@@ -73,7 +76,7 @@ stdenv.mkDerivation (finalAttrs: {
   nativeBuildInputs = [
     cmake
   ]
-  ++ lib.optionals finalAttrs.doCheck [
+  ++ lib.optionals finalAttrs.finalPackage.doCheck [
     gtest
   ]
   ++ lib.optional nvidia addDriverRunpath;
@@ -82,7 +85,7 @@ stdenv.mkDerivation (finalAttrs: {
     ncurses
   ]
   ++ lib.optional stdenv.hostPlatform.isLinux udev
-  ++ lib.optional nvidia cudatoolkit
+  ++ lib.optional nvidia cudaPackages.cuda_nvml_dev
   ++ lib.optional needDrm libdrm;
 
   # this helps cmake to find <drm.h>
@@ -96,13 +99,8 @@ stdenv.mkDerivation (finalAttrs: {
   # https://github.com/Syllo/nvtop/commit/33ec008e26a00227a666ccb11321e9971a50daf8
   doCheck = !stdenv.hostPlatform.isDarwin;
 
-  passthru = {
-    tests.version = testers.testVersion {
-      inherit (finalAttrs) version;
-      package = finalAttrs.finalPackage;
-      command = "nvtop --version";
-    };
-  };
+  nativeInstallCheckInputs = [ versionCheckHook ];
+  doInstallCheck = true;
 
   meta = {
     description = "htop-like task monitor for AMD, Adreno, Intel and NVIDIA GPUs";

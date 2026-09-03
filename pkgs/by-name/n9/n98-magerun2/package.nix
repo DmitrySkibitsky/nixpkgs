@@ -7,16 +7,16 @@
 
 php.buildComposerProject2 (finalAttrs: {
   pname = "n98-magerun2";
-  version = "9.3.0";
+  version = "10.0.1";
 
   src = fetchFromGitHub {
     owner = "netz98";
     repo = "n98-magerun2";
     tag = finalAttrs.version;
-    hash = "sha256-GKRsX3R7bcGRN3jIHj+x3hz/lVMB3IKI/c8b9od/R2w=";
+    hash = "sha256-ejpRRfkyjLAiPMuUm4q9EQLj3/V7rwCcJzpt9ePTxvA=";
   };
 
-  vendorHash = "sha256-vawCeh3oegiPrnBiAG7tthUsWXs2I+sen7XWTfsKf6w=";
+  vendorHash = "sha256-Z/v4r181ePMJES6jwy2dfv/V2YJwnIdwHmR0y5FNdKw=";
 
   nativeInstallCheckInputs = [ versionCheckHook ];
   doInstallCheck = true;

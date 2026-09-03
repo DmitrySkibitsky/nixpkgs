@@ -640,6 +640,7 @@ in
           listen 127.0.0.1:5000;
 
           # vod settings
+          vod_hls_version 6;
           vod_base_url "";
           vod_segments_base_url "";
           vod_mode mapped;
@@ -786,6 +787,7 @@ in
 
         # Caches
         PrivateTmp = true;
+        TemporaryFileSystem = "/dev/shm:mode=1777,nosuid,nodev";
         CacheDirectory = [
           "frigate"
           # https://github.com/blakeblackshear/frigate/discussions/18129
@@ -799,6 +801,11 @@ in
         # Reduce visible process scope to cgroup
         ProtectProc = "invisible";
       };
+    };
+
+    systemd.tmpfiles.settings."frigate" = {
+      # prevent gc of multiprocessing forkserver socket due to default systemd tmpfiles rules
+      "/tmp/systemd-private-%b-${config.systemd.services.frigate.name}-*/tmp/pymp-*".x = { };
     };
   };
 }

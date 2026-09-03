@@ -22,14 +22,14 @@
 
 buildPythonPackage rec {
   pname = "lastversion";
-  version = "3.6.9";
+  version = "3.6.17";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "dvershinin";
     repo = "lastversion";
     tag = "v${version}";
-    hash = "sha256-NyNa9x2sJqx65sntchWnpnyJiluDIUxxGMRIimH4SIs=";
+    hash = "sha256-cDTxcnvAdH28wAOEBnk5zLS3QMr0O3r9/DFtubh0RBk=";
   };
 
   build-system = [ setuptools ];

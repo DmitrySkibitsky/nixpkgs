@@ -1,25 +1,44 @@
 {
   lib,
+  stdenv,
   rustPlatform,
   fetchFromGitHub,
   versionCheckHook,
   perl,
+  pkg-config,
+  openssl,
+  libiconv,
 }:
 
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "stax";
-  version = "0.25.1";
+  version = "0.102.2";
 
   src = fetchFromGitHub {
     owner = "cesarferreira";
     repo = "stax";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-HHunRVDoijBOcIzj0xknj2O+m+A1nmkkxu97XZcvmJw=";
+    hash = "sha256-ItRt0J2nR94nmg9L6Pion/OB7wW7mmMFE5CHZmr2Yvs=";
   };
 
-  nativeBuildInputs = [ perl ];
+  postPatch = ''
+    # Remove darwin linker override that breaks nix builds
+    rm -f .cargo/config.toml
+  '';
 
-  cargoHash = "sha256-cJmK5uX3HCz4own2UtXFkHdGFETjina2/UW18f/g/bA=";
+  nativeBuildInputs = [
+    perl
+    pkg-config
+  ];
+
+  buildInputs = [
+    openssl
+  ]
+  ++ lib.optionals stdenv.hostPlatform.isDarwin [
+    libiconv
+  ];
+
+  cargoHash = "sha256-/jDIsdlCFXkvyuurZUes/+7/dX1BoHcWCDAkJwIwawI=";
 
   doInstallCheck = true;
   doCheck = false;

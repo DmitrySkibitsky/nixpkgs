@@ -1,10 +1,11 @@
 {
+  bintools,
   fetchurl,
   lib,
   makeWrapper,
   patchelf,
   stdenvNoCC,
-  bintools,
+  testers,
 
   # Linked dynamic libraries.
   alsa-lib,
@@ -78,11 +79,6 @@
   ## Gentoo
   bzip2,
   libcap,
-
-  # Fonts (See issue #463615)
-  makeFontsConf,
-  noto-fonts-cjk-sans,
-  noto-fonts-cjk-serif,
 
   # Necessary for USB audio devices.
   libpulseaudio,
@@ -183,13 +179,27 @@ let
   ];
 
   linux = stdenvNoCC.mkDerivation (finalAttrs: {
-    inherit pname meta passthru;
-    version = "146.0.7680.153";
+    inherit pname meta;
+    version = "152.0.7977.75";
 
-    src = fetchurl {
-      url = "https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_${finalAttrs.version}-1_amd64.deb";
-      hash = "sha256-b/DLXbvHbjUWFyJTXLoL0I6a/3r1YaVowNqr3oQ0imA=";
-    };
+    src =
+      let
+        debArch =
+          {
+            aarch64-linux = "arm64";
+            x86_64-linux = "amd64";
+          }
+          .${stdenvNoCC.hostPlatform.system};
+      in
+      fetchurl {
+        url = "https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_${finalAttrs.version}-1_${debArch}.deb";
+        hash =
+          {
+            amd64 = "sha256-oLemT3aP/A/1zMkmCtnrtT/Rb3oTHi42mU2li4LZE98=";
+            arm64 = "sha256-OFS2UlA3+NKXBIEqJoGEnE7N9peXdQ2jdCOBQD834dI=";
+          }
+          .${debArch};
+      };
 
     # With strictDeps on, some shebangs were not being patched correctly
     # ie, $out/share/google/chrome/google-chrome
@@ -219,13 +229,6 @@ let
 
     rpath = lib.makeLibraryPath deps + ":" + lib.makeSearchPathOutput "lib" "lib64" deps;
     binpath = lib.makeBinPath deps;
-
-    fontsConf = makeFontsConf {
-      fontDirectories = [
-        noto-fonts-cjk-sans
-        noto-fonts-cjk-serif
-      ];
-    };
 
     installPhase = ''
       runHook preInstall
@@ -278,14 +281,10 @@ let
         --prefix PATH            : "$binpath" \
         --suffix PATH            : "${lib.makeBinPath [ xdg-utils ]}" \
         --prefix XDG_DATA_DIRS   : "$XDG_ICON_DIRS:$GSETTINGS_SCHEMAS_PATH:${addDriverRunpath.driverLink}/share" \
-        --set FONTCONFIG_FILE "${finalAttrs.fontsConf}" \
         --set CHROME_WRAPPER  "google-chrome-$dist" \
         --add-flags "\''${NIXOS_OZONE_WL:+\''${WAYLAND_DISPLAY:+--ozone-platform-hint=auto --enable-features=WaylandWindowDecorations --enable-wayland-ime=true}}" \
         --add-flags "--simulate-outdated-no-au='Tue, 31 Dec 2099 23:59:59 GMT'" \
         --add-flags ${lib.escapeShellArg commandLineArgs}
-
-      # Make sure that libGL and libvulkan are found by ANGLE libGLESv2.so
-      patchelf --set-rpath $rpath $out/share/google/$appname/lib*GL*
 
       for elf in $out/share/google/$appname/{chrome,chrome-sandbox,chrome_crashpad_handler}; do
         patchelf --set-rpath $rpath $elf
@@ -298,15 +297,20 @@ let
     postInstall = lib.optionalString withSymlink ''
       ln -s $out/bin/google-chrome-stable $out/bin/google-chrome
     '';
+
+    passthru = {
+      updateScript = ./update.sh;
+      tests.version = testers.testVersion { package = finalAttrs.finalPackage; };
+    };
   });
 
   darwin = stdenvNoCC.mkDerivation (finalAttrs: {
-    inherit pname meta passthru;
-    version = "146.0.7680.154";
+    inherit pname meta;
+    version = "152.0.7977.76";
 
     src = fetchurl {
-      url = "http://dl.google.com/release2/chrome/aduhru4wjcwjo2cuql7gnsdev6hq_146.0.7680.154/GoogleChrome-146.0.7680.154.dmg";
-      hash = "sha256-u/i8fYn53BbQGFlBFTEayNpSQoeNPBJEBXr2KFArgW8=";
+      url = "http://dl.google.com/release2/chrome/fwccdneh3i55zgoy366y75r2ya_152.0.7977.76/GoogleChrome-152.0.7977.76.dmg";
+      hash = "sha256-VuYzRvaOH0YB/I1m1Agk+l4y4al1b4o4dZZnhm7J2PQ=";
     };
 
     dontPatch = true;
@@ -339,12 +343,14 @@ let
     postInstall = lib.optionalString withSymlink ''
       ln -s $out/bin/google-chrome-stable $out/bin/google-chrome
     '';
+
+    passthru = {
+      updateScript = ./update.sh;
+      tests.version = testers.testVersion { package = finalAttrs.finalPackage; };
+    };
   });
 
-  passthru.updateScript = ./update.sh;
-
   meta = {
-    changelog = "https://chromereleases.googleblog.com/";
     description = "Freeware web browser developed by Google";
     homepage = "https://www.google.com/chrome/browser/";
     license = lib.licenses.unfree;
@@ -352,7 +358,10 @@ let
       iedame
       mdaniels5757
     ];
-    platforms = lib.platforms.darwin ++ [ "x86_64-linux" ];
+    platforms = lib.platforms.darwin ++ [
+      "aarch64-linux"
+      "x86_64-linux"
+    ];
     sourceProvenance = with lib.sourceTypes; [ binaryNativeCode ];
     mainProgram = "google-chrome-stable";
   };

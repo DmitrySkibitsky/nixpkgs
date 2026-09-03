@@ -19,15 +19,16 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "swaylock";
-  version = "1.8.5";
+  version = "1.8.6";
 
   src = fetchFromGitHub {
     owner = "swaywm";
     repo = "swaylock";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-Bu5ghPZoLdFsgGKv3YEbIEtg0BhHUKegEUxquIPBEi4=";
+    hash = "sha256-AkH3i9egklFm8z+0M46jFx9VubGWsRGwN1eLkrwkgfs=";
   };
 
+  __structuredAttrs = true;
   strictDeps = true;
   depsBuildBuild = [ pkg-config ];
   nativeBuildInputs = [
@@ -66,6 +67,9 @@ stdenv.mkDerivation (finalAttrs: {
     mainProgram = "swaylock";
     license = lib.licenses.mit;
     platforms = lib.platforms.linux;
-    maintainers = with lib.maintainers; [ wineee ];
+    maintainers = with lib.maintainers; [
+      wineee
+      yvnth
+    ];
   };
 })

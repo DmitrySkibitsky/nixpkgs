@@ -10,16 +10,19 @@
 
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "harmonia";
-  version = "3.0.0";
+  version = "3.2.0";
+
+  __structuredAttrs = true;
+  strictDeps = true;
 
   src = fetchFromGitHub {
     owner = "nix-community";
     repo = "harmonia";
     tag = "harmonia-v${finalAttrs.version}";
-    hash = "sha256-BovRI3p2KXwQ6RF49NqLc0uKP/Jk+yA8E0eqScaIP68=";
+    hash = "sha256-eA0bEXk1T82oZCaX4HS9aZpwE9locw0pA3I1qf4yoEs=";
   };
 
-  cargoHash = "sha256-X3A+gV32itmt0SqepioT64IGzHfrCdLsQjF6EDwCTbo=";
+  cargoHash = "sha256-gHsLr2P900Pa236N4fNlJ0w9Pu10Yb0F18zufHuU/b0=";
 
   doCheck = false;
 

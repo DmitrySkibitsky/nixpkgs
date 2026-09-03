@@ -7,20 +7,20 @@
 
 buildGoModule (finalAttrs: {
   pname = "butler";
-  version = "15.26.0";
+  version = "15.30.0";
 
   src = fetchFromGitHub {
     owner = "itchio";
     repo = "butler";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-FaYxvqC/ZYFukh6H63A0dx/8IkSM0Awf4JDBZgvc5W4=";
+    hash = "sha256-zq6ZmPNhRrp2MiDr6VElPMJGXEEkdK9ZjI0XUM0nED8=";
   };
 
   buildInputs = [ brotli ];
 
   doCheck = false; # disabled because the tests don't work in a non-FHS compliant environment.
 
-  vendorHash = "sha256-8f4EVARMtdzXL3YxGimgLM/A7BF/GOaEoxffkQ1SlHw=";
+  vendorHash = "sha256-kNc3twHNWgxJEVDte4GO6da8KrUmClaFZuip1bb1fMM=";
 
   meta = {
     description = "Command-line itch.io helper";

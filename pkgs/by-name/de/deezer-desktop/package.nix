@@ -4,18 +4,19 @@
   fetchurl,
   makeWrapper,
   electron,
+  writeScript,
 }:
 
 let
-  version = "7.1.100";
+  version = "7.1.310";
   srcs = {
     x86_64-linux = fetchurl {
       url = "https://github.com/aunetx/deezer-linux/releases/download/v${version}/deezer-desktop-${version}-x64.tar.xz";
-      hash = "sha256-KU7dmXXJGLVoDf/iHP3LBcbc/+ldTdYsRD3LyGvbvZc=";
+      hash = "sha256-G1nrkyQR3pduZulFE30DTCTfVMmZe7X6nl6bcDfSf8E=";
     };
     aarch64-linux = fetchurl {
       url = "https://github.com/aunetx/deezer-linux/releases/download/v${version}/deezer-desktop-${version}-arm64.tar.xz";
-      hash = "sha256-sLso74DJaJK/o8cYYHEI/XNXjcl1MgfkegsCEOw+79Y=";
+      hash = "sha256-fMShKodtD8/icEcpRIVZZ9H3KlF/GEpMyuihcDkviWk=";
     };
   };
 
@@ -47,10 +48,9 @@ stdenv.mkDerivation (finalAttrs: {
     install -d $out/bin $out/share/deezer-desktop/resources $out/share/applications $out/share/icons/hicolor/scalable/apps
 
     substituteInPlace deezer-desktop-${version}-${archDir}/resources/dev.aunetx.deezer.desktop \
-      --replace-fail "run.sh" "deezer-desktop" \
-      --replace-fail "dev.aunetx.deezer" "deezer-desktop"
-    cp deezer-desktop-${version}-${archDir}/resources/dev.aunetx.deezer.desktop $out/share/applications/deezer-desktop.desktop
-    cp deezer-desktop-${version}-${archDir}/resources/dev.aunetx.deezer.svg $out/share/icons/hicolor/scalable/apps/deezer-desktop.svg
+      --replace-fail "run.sh" "deezer-desktop"
+    cp deezer-desktop-${version}-${archDir}/resources/dev.aunetx.deezer.desktop $out/share/applications/
+    cp deezer-desktop-${version}-${archDir}/resources/dev.aunetx.deezer.svg $out/share/icons/hicolor/scalable/apps/
     cp -r deezer-desktop-${version}-${archDir}/resources/{app.asar,linux} $out/share/deezer-desktop/resources/
 
     makeWrapper "${lib.getExe electron}" "$out/bin/deezer-desktop" \
@@ -61,6 +61,25 @@ stdenv.mkDerivation (finalAttrs: {
 
     runHook postInstall
   '';
+
+  passthru = {
+    inherit srcs;
+    updateScript = writeScript "update-deezer-desktop" ''
+      #!/usr/bin/env nix-shell
+      #!nix-shell -i bash -p curl jq common-updater-scripts
+      set -eu -o pipefail
+
+      latest_version="$(
+        curl --fail --silent --show-error --location \
+          'https://api.github.com/repos/aunetx/deezer-linux/releases/latest' |
+          jq -r '.tag_name | ltrimstr("v")'
+      )"
+
+      for platform in ${lib.escapeShellArgs (lib.attrNames srcs)}; do
+        update-source-version "${finalAttrs.pname}" "$latest_version" --ignore-same-version --source-key="passthru.srcs.$platform"
+      done
+    '';
+  };
 
   meta = {
     description = "Unofficial Linux port of the music streaming application";
