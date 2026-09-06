@@ -1,6 +1,5 @@
 {
   lib,
-  stdenv,
   rustPlatform,
   fetchFromGitHub,
   pkg-config,
@@ -48,10 +47,10 @@ rustPlatform.buildRustPackage rec {
     pkg-config
     cmake
     rustPlatform.bindgenHook
-  ]
-  ++ lib.optionals stdenv.hostPlatform.isLinux [ makeWrapper ];
+    makeWrapper
+  ];
 
-  buildInputs = lib.optionals stdenv.hostPlatform.isLinux [
+  buildInputs = [
     alsa-lib
     libpulseaudio
     libGL
@@ -61,7 +60,7 @@ rustPlatform.buildRustPackage rec {
   env.CMAKE = "${cmakeWithLibdir}";
 
   # The GUI dlopens its Wayland, X11 and GL libraries at run time.
-  postFixup = lib.optionalString stdenv.hostPlatform.isLinux ''
+  postFixup = ''
     wrapProgram $out/bin/fastpotify \
       --prefix LD_LIBRARY_PATH : ${
         lib.makeLibraryPath [
@@ -76,7 +75,7 @@ rustPlatform.buildRustPackage rec {
       }
   '';
 
-  postInstall = lib.optionalString stdenv.hostPlatform.isLinux ''
+  postInstall = ''
     install -Dm644 packaging/applications/fastpotify.desktop \
       $out/share/applications/fastpotify.desktop
     install -Dm644 packaging/icons/fastpotify.svg \
