@@ -1,5 +1,6 @@
 {
   lib,
+  stdenv,
   rustPlatform,
   fetchFromGitHub,
   pkg-config,
@@ -15,6 +16,7 @@
   libxcursor,
   libxi,
   libxrandr,
+  apple-sdk_15,
 }:
 
 let
@@ -47,20 +49,22 @@ rustPlatform.buildRustPackage rec {
     pkg-config
     cmake
     rustPlatform.bindgenHook
-    makeWrapper
-  ];
+  ]
+  ++ lib.optionals stdenv.hostPlatform.isLinux [ makeWrapper ];
 
-  buildInputs = [
-    alsa-lib
-    libpulseaudio
-    libGL
-    libx11
-  ];
+  buildInputs =
+    lib.optionals stdenv.hostPlatform.isLinux [
+      alsa-lib
+      libpulseaudio
+      libGL
+      libx11
+    ]
+    ++ lib.optionals stdenv.hostPlatform.isDarwin [ apple-sdk_15 ];
 
   env.CMAKE = "${cmakeWithLibdir}";
 
   # The GUI dlopens its Wayland, X11 and GL libraries at run time.
-  postFixup = ''
+  postFixup = lib.optionalString stdenv.hostPlatform.isLinux ''
     wrapProgram $out/bin/fastpotify \
       --prefix LD_LIBRARY_PATH : ${
         lib.makeLibraryPath [
@@ -75,7 +79,7 @@ rustPlatform.buildRustPackage rec {
       }
   '';
 
-  postInstall = ''
+  postInstall = lib.optionalString stdenv.hostPlatform.isLinux ''
     install -Dm644 packaging/applications/fastpotify.desktop \
       $out/share/applications/fastpotify.desktop
     install -Dm644 packaging/icons/fastpotify.svg \
@@ -89,6 +93,6 @@ rustPlatform.buildRustPackage rec {
     license = lib.licenses.mit;
     maintainers = with lib.maintainers; [ DmitrySkibitsky ];
     mainProgram = "fastpotify";
-    platforms = lib.platforms.linux;
+    platforms = lib.platforms.linux ++ lib.platforms.darwin;
   };
 }
