@@ -32,7 +32,7 @@ let
 in
 rustPlatform.buildRustPackage rec {
   pname = "fastpotify";
-  version = "0.6.0";
+  version = "0.7.0";
 
   __structuredAttrs = true;
 
@@ -40,10 +40,10 @@ rustPlatform.buildRustPackage rec {
     owner = "crmne";
     repo = "fastpotify";
     tag = "v${version}";
-    hash = "sha256-N7SSPALIQJpAL4nTf+H+sTHwXu6jby6DRm4oUXTTq0I=";
+    hash = "sha256-XZovQINJXG68ex8amJ6Sx9jphs6AIPnhLtI7Wh9TFgA=";
   };
 
-  cargoHash = "sha256-wC3tq8xj9tLYmZkvnsoHgYaTAtnwmktL1lAifeK0ui8=";
+  cargoHash = "sha256-m3mc9NppLyUkKNXv/U0NZOdLUC6CAi7+LUqfsc4/q30=";
 
   nativeBuildInputs = [
     pkg-config
