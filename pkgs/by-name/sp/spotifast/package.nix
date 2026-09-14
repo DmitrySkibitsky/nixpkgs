@@ -6,8 +6,10 @@
   pkg-config,
   cmake,
   makeWrapper,
-  writeShellScript,
+  icnsify,
+  nix-update-script,
   dbus,
+  rcodesign,
   alsa-lib,
   libpulseaudio,
   libGL,
@@ -21,15 +23,15 @@
 }:
 
 let
-  # projectm-sys expects CMake to install into lib/, while CMake defaults to
-  # lib64/ on NixOS. Wrap cmake to force it, matching upstream's flake.nix.
-  cmakeWithLibdir = writeShellScript "cmake-spotifast" ''
-    if [[ "$1" == "--build" ]]; then
-      exec ${cmake}/bin/cmake "$@"
-    else
-      exec ${cmake}/bin/cmake "$@" -DCMAKE_INSTALL_LIBDIR=lib
-    fi
-  '';
+  runtimeLibraries = [
+    libxkbcommon
+    wayland
+    libGL
+    libx11
+    libxcursor
+    libxi
+    libxrandr
+  ];
 in
 rustPlatform.buildRustPackage rec {
   pname = "spotifast";
@@ -46,12 +48,24 @@ rustPlatform.buildRustPackage rec {
 
   cargoHash = "sha256-A17V9f8cueyYaX/aIPMTTYERGSxNbSJrd0bpwDZXUyI=";
 
+  # projectm-sys only searches lib, while CMake may otherwise install to lib64.
+  postPatch = ''
+    substituteInPlace "$cargoDepsCopy"/source-git-*/projectm-sys-*/build.rs \
+      --replace-fail \
+      '.define("BUILD_SHARED_LIBS", build_shared_libs)' \
+      '.define("CMAKE_INSTALL_LIBDIR", "lib").define("BUILD_SHARED_LIBS", build_shared_libs)'
+  '';
+
   nativeBuildInputs = [
     pkg-config
     cmake
     rustPlatform.bindgenHook
   ]
-  ++ lib.optionals stdenv.hostPlatform.isLinux [ makeWrapper ];
+  ++ lib.optionals stdenv.hostPlatform.isLinux [ makeWrapper ]
+  ++ lib.optionals stdenv.hostPlatform.isDarwin [
+    rcodesign
+    icnsify
+  ];
 
   nativeCheckInputs = lib.optionals stdenv.hostPlatform.isLinux [ dbus ];
 
@@ -64,33 +78,35 @@ rustPlatform.buildRustPackage rec {
     ]
     ++ lib.optionals stdenv.hostPlatform.isDarwin [ apple-sdk_15 ];
 
-  env.CMAKE = "${cmakeWithLibdir}";
+  postFixup =
+    lib.optionalString stdenv.hostPlatform.isLinux ''
+      wrapProgram $out/bin/fastpotify \
+        --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath runtimeLibraries}
+      wrapProgram $out/bin/spotifast \
+        --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath runtimeLibraries}
+    ''
+    + lib.optionalString stdenv.hostPlatform.isDarwin ''
+      rcodesign sign "$out/Applications/Spotifast.app"
+    '';
 
-  # The GUI dlopens its Wayland, X11 and GL libraries at run time.
-  # Both the spotifast binary and the fastpotify compatibility binary need it.
-  postFixup = lib.optionalString stdenv.hostPlatform.isLinux ''
-    for bin in spotifast fastpotify; do
-      wrapProgram $out/bin/$bin \
-        --prefix LD_LIBRARY_PATH : ${
-          lib.makeLibraryPath [
-            libxkbcommon
-            wayland
-            libGL
-            libx11
-            libxcursor
-            libxi
-            libxrandr
-          ]
-        }
-    done
-  '';
+  postInstall =
+    lib.optionalString stdenv.hostPlatform.isLinux ''
+      install -Dm644 packaging/applications/fastpotify.desktop \
+        $out/share/applications/fastpotify.desktop
+      install -Dm644 packaging/icons/fastpotify.svg \
+        $out/share/icons/hicolor/scalable/apps/fastpotify.svg
+    ''
+    + lib.optionalString stdenv.hostPlatform.isDarwin ''
+      app="$out/Applications/Spotifast.app/Contents"
+      mkdir -p "$app/MacOS" "$app/Resources"
+      cp "$out/bin/fastpotify" "$app/MacOS/fastpotify"
+      icnsify packaging/macos/icon-1024.png -o "$app/Resources/fastpotify.icns"
+      substitute packaging/macos/Info.plist "$app/Info.plist" \
+        --replace-fail __VERSION__ "${version}" \
+        --replace-fail __BUILD__ "${version}"
+    '';
 
-  postInstall = lib.optionalString stdenv.hostPlatform.isLinux ''
-    install -Dm644 packaging/applications/fastpotify.desktop \
-      $out/share/applications/fastpotify.desktop
-    install -Dm644 packaging/icons/fastpotify.svg \
-      $out/share/icons/hicolor/scalable/apps/fastpotify.svg
-  '';
+  passthru.updateScript = nix-update-script { };
 
   meta = {
     description = "Fast native Spotify client with local playback and Spotify Connect";
