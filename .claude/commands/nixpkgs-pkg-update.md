@@ -8,7 +8,58 @@ Update a package in this nixpkgs checkout and open a PR against `NixOS/nixpkgs` 
 Follow this procedure exactly. It exists because every shortcut skipped here has already caused a real
 problem on a past PR from this checkout (see "Known pitfalls" — read it before you start, not after).
 
-## 0. Branch from real upstream, never from local `master`
+## 0. Check whether this update already exists — before writing any code
+
+Two checks, in this order, before touching `package.nix`:
+
+**a. Is the target version already in upstream `master`?**
+
+```bash
+git fetch upstream master
+git show upstream/master:pkgs/by-name/<xx>/<name>/package.nix | grep -m1 'version ='
+```
+
+If upstream already has your target version (or newer), it likely landed via a squash-merged PR
+whose commit SHA doesn't match anything in your local history. There's nothing to update — just make
+sure your local `master` is in sync (see step 7) and stop here.
+
+**b. Is there already an open PR doing this update?**
+
+```bash
+gh search prs --repo NixOS/nixpkgs "<package-attr>" --state open \
+  --json number,title,url,author,createdAt,updatedAt
+# If this is a rename, also search under the old attribute name:
+gh search prs --repo NixOS/nixpkgs "<old-attr>" --state open \
+  --json number,title,url,author,createdAt,updatedAt
+```
+
+For every hit, check what version it targets — nixpkgs PR titles follow the
+`<pkg-name>: <from> -> <to>` convention, so the target version is usually right there in the title;
+otherwise check `gh pr view <n> --repo NixOS/nixpkgs --json title,body` or `gh pr diff <n> --repo NixOS/nixpkgs`.
+Compare it against the version you're about to ship, e.g.:
+
+```bash
+nix-instantiate --eval -E 'builtins.compareVersions "<their-target>" "<your-target>"'
+# -1 = theirs is older (their PR doesn't cover your bump, proceed)
+#  0 = same version (likely a duplicate)
+#  1 = theirs is newer (their PR already supersedes your bump)
+```
+
+If an open PR already bumps to a version `>=` your target, **stop and tell the user before doing
+anything else** — don't open a duplicate PR. Lay out the options instead of picking one yourself:
+review/approve the existing PR (especially valuable if the user maintains the package — maintainer
+approval carries real weight, see step 6), or, only if there's a concrete reason the existing PR
+should be superseded (abandoned, broken, missing something required), say so explicitly and get
+confirmation before opening a second PR anyway.
+
+**Precedent:** this exact scenario happened with PR #563503 (`spotifast: rename from fastpotify`,
+0.7.1 -> 0.8.0) — opened, fully validated, and pushed before anyone noticed that PR #563375 already
+did the identical rename+bump (opened ~8 hours earlier by a different contributor), and was more
+complete besides (macOS app bundle packaging, codesign, `nix-update-script`). #563503 had to be
+closed as a duplicate after the fact. A step-0 search would have caught this before any work was
+done.
+
+## 1. Branch from real upstream, never from local `master`
 
 ```bash
 git fetch upstream master
@@ -30,7 +81,7 @@ changes). GitHub showed all 13 of those unrelated commits as part of the PR. Fix
 rebuild the branch with `git branch -f <branch> upstream/master && git cherry-pick <the-one-real-commit>`,
 then `git push --force`. Branching correctly the first time avoids this entirely.
 
-## 1. Make the change
+## 2. Make the change
 
 - If the package already exists in `pkgs/by-name/<xx>/<name>/package.nix`, edit it in place.
 - If upstream renamed the project, `git mv` the directory to the new two-letter bucket
@@ -48,7 +99,7 @@ then `git push --force`. Branching correctly the first time avoids this entirely
   <old-name> = warnAlias "'<old-name>' has been renamed to '<new-name>'" <new-name>; # Added <YYYY-MM-DD>
   ```
 
-## 2. Validate
+## 3. Validate
 
 Run all of these before committing — they map directly to the PR template checklist in
 `CONTRIBUTING.md`:
@@ -109,7 +160,7 @@ git rev-parse --is-shallow-repository   # should now print false
 Never do this blind — if the objects are genuinely missing (e.g. a real partial/shallow clone), this
 would hide a real problem instead of an artifact of `nixpkgs-review`.
 
-## 3. Commit
+## 4. Commit
 
 Follow `pkgs/README.md`'s commit convention: `<pkg-name>: <from> -> <to>` (or, for a rename,
 `<new-name>: rename from <old-name>, <from> -> <to>`), no trailing period on the summary line, body
@@ -135,7 +186,7 @@ attribution") — that global rule holds for every other repo, but in `nixpkgs` 
 Also add a short, separate "AI disclosure" section to the PR body itself (see template below) — the
 policy treats commit-trailer disclosure and PR-body disclosure as two separate requirements.
 
-## 4. Push and open the PR
+## 5. Push and open the PR
 
 ```bash
 git push -u origin <branch-name>
@@ -169,7 +220,7 @@ This PR was prepared with the assistance of Claude Code (<model name/version>). 
 reviewed and are understood by me before submission. See the `Assisted-by:` trailer on the commit.
 ```
 
-## 5. After opening: don't expect to self-merge
+## 6. After opening: don't expect to self-merge
 
 `@NixOS/nixpkgs-merge-bot merge` only works if **all** of: the PR author is `@r-ryantm` or a Nixpkgs
 committer, the invoker is a maintainer of the package, and the package lives in `pkgs/by-name`. Being
@@ -179,15 +230,39 @@ trust/priority, not a bypass. If there's no activity after about a week, ping in
 "PRs ready for review" thread or the Matrix `#review-requests:nixos.org` room — don't just wait
 silently, but don't be pushy either.
 
+## 7. Once merged upstream (or superseded): sync local `master`
+
+Local `master` in this checkout is also used to build the local `nixpkgs-local` overlay for
+`~/nixos` (see `home-manager/modules/overlays.nix`), so it needs to track whatever actually lands
+upstream — not necessarily your own commit if someone else's PR was the one that merged.
+
+```bash
+git fetch upstream master
+git checkout master
+git merge --no-edit <your-branch>      # or cherry-pick the commit that actually landed/is best
+nix build .#<attr> --no-link           # re-verify after the merge
+git push origin master
+```
+
+If a competing PR (per step 0) turns out to have a better implementation than yours and gets merged
+first, prefer pulling *their* commit into local `master` (e.g. `git fetch <their-fork> <their-branch>`
+then `git cherry-pick`) over keeping your own — don't let local `master` diverge from what's actually
+upstream. If your branch and `master` conflict only on the file both renamed to the same new path,
+resolve with `git checkout --theirs <path>` for whichever side should win, not a manual 3-way merge.
+
 ## Known pitfalls (precedent log — keep this section updated)
 
-1. **Unrelated commits leaking into a PR.** Cause: branching from a diverged/stale local `master`
-   instead of freshly-fetched `upstream/master`. Fix: step 0 above. (PR #563503, first push.)
-2. **Missing AI disclosure.** Cause: forgetting the `Assisted-by:` trailer and PR-body disclosure
-   section required by `CONTRIBUTING.md`'s Automation/AI policy, which the repo's own bot enforces
-   via the `llm-assisted` label. Fix: step 3 above. (PR #563503, initially opened without it, fixed
-   by amending the commit and editing the PR body.)
+1. **Duplicate PR for work someone else already did.** Cause: not checking for an existing PR before
+   starting. Fix: step 0 above. (PR #563503 duplicated the already-open, more complete PR #563375 for
+   the identical `fastpotify` -> `spotifast` rename+bump; #563503 had to be closed and the local fork
+   re-synced onto #563375's implementation.)
+2. **Unrelated commits leaking into a PR.** Cause: branching from a diverged/stale local `master`
+   instead of freshly-fetched `upstream/master`. Fix: step 1 above. (PR #563503, first push.)
 3. **`nixpkgs-review --remote .` silently shallow-marking your own repo.** Cause: its internal
-   `git fetch --depth=1 .` mutates your real `.git/shallow`. Fix: step 2 above. (Surfaced as a failed
+   `git fetch --depth=1 .` mutates your real `.git/shallow`. Fix: step 3 above. (Surfaced as a failed
    `git push` with "did not receive expected object" right after running `nixpkgs-review` on PR
    #563503.)
+4. **Missing AI disclosure.** Cause: forgetting the `Assisted-by:` trailer and PR-body disclosure
+   section required by `CONTRIBUTING.md`'s Automation/AI policy, which the repo's own bot enforces
+   via the `llm-assisted` label. Fix: step 4 above. (PR #563503, initially opened without it, fixed
+   by amending the commit and editing the PR body.)
