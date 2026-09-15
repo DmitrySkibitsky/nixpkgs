@@ -8,6 +8,26 @@ Update a package in this nixpkgs checkout and open a PR against `NixOS/nixpkgs` 
 Follow this procedure exactly. It exists because every shortcut skipped here has already caused a real
 problem on a past PR from this checkout (see "Known pitfalls" — read it before you start, not after).
 
+## Branch model in this checkout — read this first
+
+This checkout deliberately keeps two different branches, and the distinction matters for every step
+below:
+
+- **`master`** is a pure, untouched mirror of `upstream/master` (`NixOS/nixpkgs`). Never commit to it
+  directly, never leave it merged/rebased ahead of upstream. Its only job is to be an always-accurate,
+  always-clean base to branch from.
+- **`personal`** is where every local customization lives: the local `nixpkgs-local` overlay used by
+  `~/nixos` (see `home-manager/modules/overlays.nix`), this very `.claude/commands/` tooling, and any
+  package preview/patch not yet merged upstream. It's always `master` plus whatever local commits are
+  currently wanted. This is the branch actually checked out day to day — `~/nixos`'s `nixpkgs-local`
+  flake input is a plain `path:` input, so whatever branch is checked out here **is** what that overlay
+  builds against.
+
+Per-package update branches (the ones this command creates) branch off `master`, get pushed and
+opened as a PR against upstream, and — regardless of whether/when that PR merges — also get merged
+into `personal` so the local overlay immediately reflects the change. `master` itself never receives
+that merge; it only ever moves by fast-forwarding to upstream.
+
 ## 0. Check whether this update already exists — before writing any code
 
 Two checks, in this order, before touching `package.nix`:
@@ -21,7 +41,7 @@ git show upstream/master:pkgs/by-name/<xx>/<name>/package.nix | grep -m1 'versio
 
 If upstream already has your target version (or newer), it likely landed via a squash-merged PR
 whose commit SHA doesn't match anything in your local history. There's nothing to update — just make
-sure your local `master` is in sync (see step 7) and stop here.
+sure your local `master` is fast-forwarded (see step 1) and stop here.
 
 **b. Is there already an open PR doing this update?**
 
@@ -59,27 +79,32 @@ complete besides (macOS app bundle packaging, codesign, `nix-update-script`). #5
 closed as a duplicate after the fact. A step-0 search would have caught this before any work was
 done.
 
-## 1. Branch from real upstream, never from local `master`
+## 1. Sync `master`, then branch from it — never from `personal`
 
 ```bash
 git fetch upstream master
-git checkout -b <branch-name> upstream/master
+git checkout master
+git merge --ff-only upstream/master   # must be a fast-forward; if it isn't, master was committed to directly — stop and fix that first
+git checkout -b <branch-name> master
 ```
 
-Do **not** branch from local `master`. Local `master` in this checkout regularly diverges from
-`upstream/master` — it can be behind (missing recent upstream commits) or contain old pre-squash
-local history whose commits were already merged upstream under different SHAs (GitHub squash-merges
-change the commit hash). If you branch from local `master` in either state, `git log` on your new
-branch will include commits that aren't actually new — and they'll show up as extra commits in your
-PR's diff/commit list even though they're already upstream.
+Do **not** branch from `personal` (or from local `master` without fast-forwarding it first). `master`
+is supposed to be a pure upstream mirror (see "Branch model" above), but only actually is one if you
+sync it every time before branching. `personal` carries local-only commits (the `.claude/` tooling,
+package previews not yet upstream) that must never leak into an upstream PR. If you branch from a
+stale `master` or from `personal`, `git log` on your new branch will include commits that aren't
+actually new, or aren't meant for upstream at all — and they'll show up as extra commits in your PR's
+diff/commit list.
 
 **Precedent:** PR https://github.com/NixOS/nixpkgs/pull/563503 (`spotifast: rename from fastpotify`)
-was first opened from a branch cut off local `master`, which was 13 commits ahead of
-`upstream/master` with old, already-squash-merged local history (`fastpotify: init at 0.6.0`,
-a `warp-terminal` version bump, etc., all pre-dating the real upstream squash-merges of the same
-changes). GitHub showed all 13 of those unrelated commits as part of the PR. Fix used at the time:
-rebuild the branch with `git branch -f <branch> upstream/master && git cherry-pick <the-one-real-commit>`,
-then `git push --force`. Branching correctly the first time avoids this entirely.
+was first opened from a branch cut off local `master` back when this checkout had only one working
+branch and no `master`/`personal` split — `master` was 13 commits ahead of `upstream/master` with old,
+already-squash-merged local history (`fastpotify: init at 0.6.0`, a `warp-terminal` version bump,
+etc., all pre-dating the real upstream squash-merges of the same changes). GitHub showed all 13 of
+those unrelated commits as part of the PR. Fix used at the time: rebuild the branch with
+`git branch -f <branch> upstream/master && git cherry-pick <the-one-real-commit>`, then
+`git push --force`. The `master`/`personal` split (and always fast-forwarding `master` first) exists
+specifically so this can't happen again.
 
 ## 2. Make the change
 
@@ -230,25 +255,30 @@ trust/priority, not a bypass. If there's no activity after about a week, ping in
 "PRs ready for review" thread or the Matrix `#review-requests:nixos.org` room — don't just wait
 silently, but don't be pushy either.
 
-## 7. Once merged upstream (or superseded): sync local `master`
+## 7. Merge into `personal` — never into `master`
 
-Local `master` in this checkout is also used to build the local `nixpkgs-local` overlay for
-`~/nixos` (see `home-manager/modules/overlays.nix`), so it needs to track whatever actually lands
-upstream — not necessarily your own commit if someone else's PR was the one that merged.
+The local `nixpkgs-local` overlay for `~/nixos` (see `home-manager/modules/overlays.nix`) is built
+from whatever's checked out in `personal`, so that's where the finished change needs to end up —
+regardless of whether the upstream PR has merged yet, is still pending review, or never merges at
+all. `master` stays untouched; it only ever moves by fast-forwarding to upstream (step 1).
 
 ```bash
-git fetch upstream master
-git checkout master
-git merge --no-edit <your-branch>      # or cherry-pick the commit that actually landed/is best
+git checkout personal
+git merge --no-edit <your-branch>      # or cherry-pick the specific commit(s)
 nix build .#<attr> --no-link           # re-verify after the merge
-git push origin master
+git push origin personal
 ```
 
 If a competing PR (per step 0) turns out to have a better implementation than yours and gets merged
-first, prefer pulling *their* commit into local `master` (e.g. `git fetch <their-fork> <their-branch>`
-then `git cherry-pick`) over keeping your own — don't let local `master` diverge from what's actually
-upstream. If your branch and `master` conflict only on the file both renamed to the same new path,
-resolve with `git checkout --theirs <path>` for whichever side should win, not a manual 3-way merge.
+first, prefer pulling *their* commit into `personal` (e.g. `git fetch <their-fork> <their-branch>`
+then `git cherry-pick`) over keeping your own. If your branch and `personal` conflict only on the file
+both renamed to the same new path, resolve with `git checkout --theirs <path>` for whichever side
+should win, not a manual 3-way merge.
+
+Once the PR actually merges upstream, `master` picks up the real, canonical commit automatically the
+next time you fast-forward it (step 1) — at that point `personal`'s own copy of the same change
+becomes redundant history that a future rebase of `personal` onto `master` will clean up, not
+something to fix immediately.
 
 ## Known pitfalls (precedent log — keep this section updated)
 
