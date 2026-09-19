@@ -1140,15 +1140,15 @@ final: prev: {
     }:
     buildLuarocksPackage {
       pname = "fzf-lua";
-      version = "0.0.2695-1";
+      version = "0.0.2698-1";
       knownRockspec =
         (fetchurl {
-          url = "mirror://luarocks/fzf-lua-0.0.2695-1.rockspec";
-          sha256 = "0j67aycb18nyvhycfl01hpqv2hszzvhnmmyy46pxa6i03ywfxhyy";
+          url = "mirror://luarocks/fzf-lua-0.0.2698-1.rockspec";
+          sha256 = "1yx1hz9ym9jax584dxg421pdn3a5siir145z3hga3yj7k10y36i8";
         }).outPath;
       src = fetchzip {
-        url = "https://github.com/ibhagwan/fzf-lua/archive/05e44d38de0a79c11fba5f7bf8138791b1dbdd1e.zip";
-        sha256 = "0lj5xmixmwgy647x166shad5dh03s7mbsp3097lw9cjq7icag7lz";
+        url = "https://github.com/ibhagwan/fzf-lua/archive/02bc882f208f3481aa959dbbee8ce5edad2fd8b2.zip";
+        sha256 = "0l0c2a17f62xfx9lbwgv5j2nbl645q2djxkl50cmih1x8kmd8p60";
       };
 
       disabled = luaOlder "5.1";
@@ -4483,25 +4483,25 @@ final: prev: {
       buildLuarocksPackage,
       fetchurl,
       fetchzip,
-      luaOlder,
+      lua,
     }:
     buildLuarocksPackage {
       pname = "lz.n";
-      version = "2.11.3-1";
+      version = "3.1.0-1";
       knownRockspec =
         (fetchurl {
-          url = "mirror://luarocks/lz.n-2.11.3-1.rockspec";
-          sha256 = "0fg256gwa7444fh7wivasi77x7qgxx4r3hjqw90qa1kav10np88n";
+          url = "mirror://luarocks/lz.n-3.1.0-1.rockspec";
+          sha256 = "0b6d61r0x9x0f03f9mx4l0na9jphlkihizvh7f29xfxvk9khgfp6";
         }).outPath;
       src = fetchzip {
-        url = "https://github.com/nvim-neorocks/lz.n/archive/v2.11.3.zip";
-        sha256 = "0vnr1iiq4z3q7s3qylfmvcclmspydg8ll4p75jilcx9d114v7wwc";
+        url = "https://github.com/lumen-oss/lz.n/archive/v3.1.0.zip";
+        sha256 = "00xc3k6pcihz1cznmj4lsjwlcb54k0m5iv4x6zqkqkgwavsv62iw";
       };
 
-      disabled = luaOlder "5.1";
+      disabled = lua.luaversion != "5.1";
 
       meta = {
-        homepage = "https://github.com/nvim-neorocks/lz.n";
+        homepage = "https://github.com/lumen-oss/lz.n";
         maintainers = with lib.maintainers; [ mrcjkb ];
         license = lib.licenses.gpl2Plus;
         description = "🦥 A dead simple lazy-loading Lua library for Neovim plugins.";
@@ -4590,15 +4590,15 @@ final: prev: {
     }:
     buildLuarocksPackage {
       pname = "lzn-auto-require";
-      version = "0.2.0-1";
+      version = "1.0.0-1";
       knownRockspec =
         (fetchurl {
-          url = "mirror://luarocks/lzn-auto-require-0.2.0-1.rockspec";
-          sha256 = "02w8pvyhnlbsz56rhgjql13qkh7fk05ai1qkqvk90a8ni8w48hh3";
+          url = "mirror://luarocks/lzn-auto-require-1.0.0-1.rockspec";
+          sha256 = "1glmbikz8vhwavrqpxibxj31k8x59pl7mr76b9k36nk217g7irln";
         }).outPath;
       src = fetchzip {
-        url = "https://github.com/horriblename/lzn-auto-require/archive/v0.2.0.zip";
-        sha256 = "1mgka1mmvpd2gfya898qdbbwrp5rpqds8manjs1s7g5x63xp6b98";
+        url = "https://github.com/horriblename/lzn-auto-require/archive/v1.0.0.zip";
+        sha256 = "07sv61bcg6p1039vbh9fdzdsc3x4fadq5j6c5hv3qf4sdzigpdjh";
       };
 
       disabled = luaOlder "5.1";

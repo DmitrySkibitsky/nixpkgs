@@ -1023,8 +1023,8 @@ let
         mktplcRef = {
           name = "coder-remote";
           publisher = "coder";
-          version = "1.16.2";
-          hash = "sha256-N5tWMoO5RUVO4HXVqyXNtn/pjIF9miJdoqF6Lt8dAhg=";
+          version = "1.16.3";
+          hash = "sha256-8wPhSUBez7NEaUUr9osnS4gIbkpOj0gRjA1j7l558aM=";
         };
         meta = {
           description = "Extension for Visual Studio Code to open any Coder workspace in VS Code with a single click";
@@ -1175,8 +1175,8 @@ let
         mktplcRef = {
           publisher = "DanielGavin";
           name = "ols";
-          version = "0.1.46";
-          hash = "sha256-X2Tp0rsPp0UoKW4Yz7Ht/7b1zO0bL92u6CtyKRy+hDY=";
+          version = "0.1.47";
+          hash = "sha256-qv+rMLcLTTw0zCDd87v2om96N8GhokrePdqXgRYWRe0=";
         };
         meta = {
           description = "Visual Studio Code extension for Odin language";
@@ -1391,8 +1391,8 @@ let
         mktplcRef = {
           name = "competitive-programming-helper";
           publisher = "DivyanshuAgrawal";
-          version = "2026.8.1785865132";
-          hash = "sha256-/JVuIOoTgeENtbvYFri1/RtiZ6PCabOrwC1mzHoaML4=";
+          version = "2026.9.1789051951";
+          hash = "sha256-Et8v+Yl51tKTGoKx8rOMW3VscFkfIKwwqcLyw9fmI90=";
         };
         meta = {
           changelog = "https://marketplace.visualstudio.com/items/DivyanshuAgrawal.competitive-programming-helper/changelog";
@@ -2768,8 +2768,8 @@ let
         mktplcRef = {
           name = "magit";
           publisher = "kahole";
-          version = "0.6.69";
-          hash = "sha256-gx7OWV+X17XqShFj0mH4Zg6X26vpOnkrYW8/YdeGd7c=";
+          version = "0.6.70";
+          hash = "sha256-j/AyPp9pHocM9KXPKxsdCVTNiEHwZ7kWXymiHpv+ZmY=";
         };
         meta = {
           changelog = "https://marketplace.visualstudio.com/items/kahole.magit/changelog";
@@ -3854,8 +3854,8 @@ let
         mktplcRef = {
           name = "pico8-ls";
           publisher = "PollywogGames";
-          version = "0.6.1";
-          hash = "sha256-TlULqIKb3R+bvjN3f4Bwha0bewqCHpPVFiePHNV2kmE=";
+          version = "0.7.0";
+          hash = "sha256-2e28Z4o76f0G52fzqHNqFnBk88426cRfUyiaW1jmeMc=";
         };
         meta = {
           changelog = "https://marketplace.visualstudio.com/items/PollywogGames.pico8-ls/changelog";
@@ -4530,8 +4530,8 @@ let
         mktplcRef = {
           publisher = "streetsidesoftware";
           name = "code-spell-checker";
-          version = "4.7.3";
-          hash = "sha256-xvvw+8JvRte3f3Zm24NzfjFMeTAkKeUS0EqqxFoEl/0=";
+          version = "4.9.3";
+          hash = "sha256-8MfXeGFCeKhxa3Z/YISz60N6ZmGHRJde3X/y4I6Totw=";
         };
         meta = {
           changelog = "https://marketplace.visualstudio.com/items/streetsidesoftware.code-spell-checker/changelog";

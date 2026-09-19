@@ -166,9 +166,6 @@ in
 
   meta = {
     doc = ./nordvpn.md;
-    maintainers = with lib.maintainers; [
-      different-error
-      novalkun
-    ];
+    maintainers = pkgs.nordvpn.meta.maintainers;
   };
 }

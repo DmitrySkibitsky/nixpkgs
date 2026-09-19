@@ -3,7 +3,7 @@
   stdenv,
   fetchFromGitHub,
   fetchPnpmDeps,
-  pnpm,
+  pnpm_11,
   pnpmConfigHook,
   nodejs,
   rustPlatform,
@@ -16,6 +16,8 @@
 }:
 
 let
+  pnpm = pnpm_11;
+
   console = stdenv.mkDerivation (finalAttrs: {
     pname = "rustfs-console";
     version = "0.1.26";
@@ -31,6 +33,7 @@ let
 
     pnpmDeps = fetchPnpmDeps {
       inherit (finalAttrs) pname version src;
+      inherit pnpm;
       fetcherVersion = 4;
       hash = "sha256-wfaUMWTa8eFkzY/wCD5o7+G2OiSTWCqm+py3sgqDI04=";
     };
@@ -121,7 +124,10 @@ rustPlatform.buildRustPackage (finalAttrs: {
     homepage = "https://github.com/rustfs/rustfs";
     changelog = "https://github.com/rustfs/rustfs/releases/tag/${finalAttrs.version}";
     license = lib.licenses.asl20;
-    maintainers = with lib.maintainers; [ marcel ];
+    maintainers = with lib.maintainers; [
+      marcel
+      adamcstephens
+    ];
     mainProgram = "rustfs";
   };
 })

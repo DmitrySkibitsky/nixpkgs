@@ -407,9 +407,9 @@
   };
 
   cuda = {
-    version = "0.21.1";
+    version = "0.21.2";
     url = "github:tree-sitter-grammars/tree-sitter-cuda";
-    hash = "sha256-sX9AOe8dJJsRbzGq20qakWBnLiwYQ90mQspAuYxQzoQ=";
+    hash = "sha256-s2qrZx5fEu/I6xE2paX/Nlmgvo6T27qqvy1cI8iznAA=";
     meta = {
       license = lib.licenses.mit;
     };

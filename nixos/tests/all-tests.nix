@@ -573,6 +573,7 @@ in
   documize = runTest ./documize.nix;
   docuseal-psql = runTest ./docuseal-postgres.nix;
   docuseal-sqlite = runTest ./docuseal-sqlite.nix;
+  docuum = runTestOn [ "x86_64-linux" "aarch64-linux" ] ./docuum.nix;
   doh-proxy-rust = runTest ./doh-proxy-rust.nix;
   dokuwiki = runTest ./dokuwiki.nix;
   dolibarr = runTest ./dolibarr.nix;
@@ -832,6 +833,7 @@ in
   };
   haproxy = runTest ./haproxy.nix;
   harmonia = runTest ./harmonia.nix;
+  harmonia-gc = runTest ./harmonia-gc.nix;
   haste-server = runTest ./haste-server.nix;
   hbase2 = runTest {
     imports = [ ./hbase.nix ];
@@ -1240,6 +1242,7 @@ in
   nebula.reload = runTest ./nebula/reload.nix;
   neo4j = runTest ./neo4j.nix;
   netbird = runTest ./netbird.nix;
+  netbird-relay = runTest ./netbird-relay.nix;
   netbox = runTest ./web-apps/netbox/default.nix;
   netdata = runTest ./netdata.nix;
   netfoil = runTest ./netfoil.nix;
@@ -1397,6 +1400,7 @@ in
   openldap = runTest ./openldap.nix;
   openresty-lua = runTest ./openresty-lua.nix;
   opensearch = discoverTests (import ./opensearch.nix);
+  opensearch-dashboards = handleTest ./opensearch-dashboards.nix { };
   opensmtpd = handleTest ./opensmtpd.nix { };
   opensmtpd-rspamd = handleTest ./opensmtpd-rspamd.nix { };
   opensnitch = runTest ./opensnitch.nix;
@@ -1461,7 +1465,6 @@ in
   pgadmin4 = runTest ./pgadmin4.nix;
   pgbackrest = import ./pgbackrest { inherit runTest; };
   pgbouncer = runTest ./pgbouncer.nix;
-  pghero = runTest ./pghero.nix;
   pgmanage = runTest ./pgmanage.nix;
   pgweb = runTest ./pgweb.nix;
   phosh = runTest ./phosh.nix;
