@@ -5,6 +5,7 @@
   fetchFromGitHub,
   pkg-config,
   cmake,
+  cacert,
   makeWrapper,
   icnsify,
   nix-update-script,
@@ -24,6 +25,7 @@
 
 let
   runtimeLibraries = [
+    dbus
     libxkbcommon
     wayland
     libGL
@@ -35,7 +37,7 @@ let
 in
 rustPlatform.buildRustPackage rec {
   pname = "spotifast";
-  version = "0.8.0";
+  version = "0.9.1";
 
   __structuredAttrs = true;
 
@@ -43,10 +45,10 @@ rustPlatform.buildRustPackage rec {
     owner = "crmne";
     repo = "spotifast";
     tag = "v${version}";
-    hash = "sha256-cX9DXG4u7mBSl6sO768A1vJ9kHZZc12+STzRU0KuWh0=";
+    hash = "sha256-vV51B97dNiJzqkZ1Stmb/hplfTaVVAf2EbEdCWax+qE=";
   };
 
-  cargoHash = "sha256-A17V9f8cueyYaX/aIPMTTYERGSxNbSJrd0bpwDZXUyI=";
+  cargoHash = "sha256-NMk1s2Qt/HevG6DyBnM3PJnLqCsA6/oZPNJHAiiG0LQ=";
 
   # projectm-sys only searches lib, while CMake may otherwise install to lib64.
   postPatch = ''
@@ -54,6 +56,10 @@ rustPlatform.buildRustPackage rec {
       --replace-fail \
       '.define("BUILD_SHARED_LIBS", build_shared_libs)' \
       '.define("CMAKE_INSTALL_LIBDIR", "lib").define("BUILD_SHARED_LIBS", build_shared_libs)'
+  '';
+  # The proxy test needs a valid CA bundle.
+  preCheck = ''
+    export SSL_CERT_FILE="${cacert}/etc/ssl/certs/ca-bundle.crt"
   '';
 
   nativeBuildInputs = [
@@ -91,19 +97,27 @@ rustPlatform.buildRustPackage rec {
 
   postInstall =
     lib.optionalString stdenv.hostPlatform.isLinux ''
-      install -Dm644 packaging/applications/fastpotify.desktop \
-        $out/share/applications/fastpotify.desktop
-      install -Dm644 packaging/icons/fastpotify.svg \
-        $out/share/icons/hicolor/scalable/apps/fastpotify.svg
+      install -Dm644 packaging/applications/spotifast.desktop \
+        $out/share/applications/spotifast.desktop
+      install -Dm644 packaging/icons/spotifast.svg \
+        $out/share/icons/hicolor/scalable/apps/spotifast.svg
     ''
     + lib.optionalString stdenv.hostPlatform.isDarwin ''
       app="$out/Applications/Spotifast.app/Contents"
       mkdir -p "$app/MacOS" "$app/Resources"
-      cp "$out/bin/fastpotify" "$app/MacOS/fastpotify"
-      icnsify packaging/macos/icon-1024.png -o "$app/Resources/fastpotify.icns"
+      executable=Spotifast
+      identifier=rocks.spotifast.Spotifast
+      if [ "${version}" = "0.9.1" ]; then
+        executable=fastpotify
+        identifier=me.paolino.fastpotify
+      fi
+      cp "$out/bin/spotifast" "$app/MacOS/$executable"
+      icnsify packaging/macos/icon-1024.png -o "$app/Resources/spotifast.icns"
       substitute packaging/macos/Info.plist "$app/Info.plist" \
         --replace-fail __VERSION__ "${version}" \
-        --replace-fail __BUILD__ "${version}"
+        --replace-fail __BUILD__ "${version}" \
+        --replace-fail __EXECUTABLE__ "$executable" \
+        --replace-fail __IDENTIFIER__ "$identifier"
     '';
 
   passthru.updateScript = nix-update-script { };
