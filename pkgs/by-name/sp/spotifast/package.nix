@@ -37,7 +37,7 @@ let
 in
 rustPlatform.buildRustPackage rec {
   pname = "spotifast";
-  version = "0.9.1";
+  version = "0.10.1";
 
   __structuredAttrs = true;
 
@@ -45,10 +45,10 @@ rustPlatform.buildRustPackage rec {
     owner = "crmne";
     repo = "spotifast";
     tag = "v${version}";
-    hash = "sha256-vV51B97dNiJzqkZ1Stmb/hplfTaVVAf2EbEdCWax+qE=";
+    hash = "sha256-rLyzvv7eJSHbzJdwx0iuwk5MHXWHHneGTOkpUQwIGAg=";
   };
 
-  cargoHash = "sha256-NMk1s2Qt/HevG6DyBnM3PJnLqCsA6/oZPNJHAiiG0LQ=";
+  cargoHash = "sha256-pwid4r8fy3t4g6CsAepkvT9KbExUxml6jj8c71Pv/wc=";
 
   # projectm-sys only searches lib, while CMake may otherwise install to lib64.
   postPatch = ''
@@ -107,15 +107,11 @@ rustPlatform.buildRustPackage rec {
       mkdir -p "$app/MacOS" "$app/Resources"
       executable=Spotifast
       identifier=rocks.spotifast.Spotifast
-      if [ "${version}" = "0.9.1" ]; then
-        executable=fastpotify
-        identifier=me.paolino.fastpotify
-      fi
       cp "$out/bin/spotifast" "$app/MacOS/$executable"
       icnsify packaging/macos/icon-1024.png -o "$app/Resources/spotifast.icns"
       substitute packaging/macos/Info.plist "$app/Info.plist" \
         --replace-fail __VERSION__ "${version}" \
-        --replace-fail __BUILD__ "${version}" \
+        --replace-fail __BUILD__ "${lib.head (lib.splitString "-" version)}" \
         --replace-fail __EXECUTABLE__ "$executable" \
         --replace-fail __IDENTIFIER__ "$identifier"
     '';
