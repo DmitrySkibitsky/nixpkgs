@@ -37,7 +37,7 @@ let
 in
 rustPlatform.buildRustPackage rec {
   pname = "spotifast";
-  version = "0.11.0";
+  version = "0.11.2";
 
   __structuredAttrs = true;
 
@@ -45,10 +45,10 @@ rustPlatform.buildRustPackage rec {
     owner = "crmne";
     repo = "spotifast";
     tag = "v${version}";
-    hash = "sha256-jp8iDO0b/EoFvZWB7n3hRtRma2Vx1f9UeZpLlgXtwcY=";
+    hash = "sha256-4hseXK3dvXL6fBNDuQ2sq8wrtpRqSRZPErgCixPdt50=";
   };
 
-  cargoHash = "sha256-Ed4Bim++LqzZ/DY+SjF5WS0DWs3Wg0Vb3WWgxL0URn8=";
+  cargoHash = "sha256-giJlt4MNb0/zWV8Y319HYtZc+q/ADRBxbodt/2MKu/0=";
 
   # projectm-sys only searches lib, while CMake may otherwise install to lib64.
   postPatch = ''
@@ -57,6 +57,7 @@ rustPlatform.buildRustPackage rec {
       '.define("BUILD_SHARED_LIBS", build_shared_libs)' \
       '.define("CMAKE_INSTALL_LIBDIR", "lib").define("BUILD_SHARED_LIBS", build_shared_libs)'
   '';
+
   # The proxy test needs a valid CA bundle.
   preCheck = ''
     export SSL_CERT_FILE="${cacert}/etc/ssl/certs/ca-bundle.crt"
@@ -117,6 +118,12 @@ rustPlatform.buildRustPackage rec {
     '';
 
   passthru.updateScript = nix-update-script { };
+
+  __darwinAllowLocalNetworking = true;
+  # CoreText's fallback test reads the system font files.
+  __impureHostDeps = lib.optionals stdenv.hostPlatform.isDarwin [
+    "/System/Library/Fonts"
+  ];
 
   meta = {
     description = "Fast native Spotify client with local playback and Spotify Connect";
