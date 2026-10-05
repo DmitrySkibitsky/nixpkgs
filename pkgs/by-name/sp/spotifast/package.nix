@@ -87,8 +87,6 @@ rustPlatform.buildRustPackage rec {
 
   postFixup =
     lib.optionalString stdenv.hostPlatform.isLinux ''
-      wrapProgram $out/bin/fastpotify \
-        --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath runtimeLibraries}
       wrapProgram $out/bin/spotifast \
         --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath runtimeLibraries}
     ''
