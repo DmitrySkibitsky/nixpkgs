@@ -242,6 +242,10 @@ in
       ]
       "The grafana-agent module has been removed. Consider migrating to `grafana-alloy` (`services.alloy.enable`). See <https://grafana.com/docs/alloy/latest/set-up/migrate/>"
     )
+    (mkRemovedOptionModule [
+      "services"
+      "honk"
+    ] "The honk module has been removed.")
     (mkRemovedOptionModule
       [
         "services"
@@ -331,6 +335,9 @@ in
     '')
     (mkRemovedOptionModule [ "services" "prey" ] ''
       prey-bash-client is deprecated upstream
+    '')
+    (mkRemovedOptionModule [ "services" "prosody-filer" ] ''
+      The Prosody Filer package and module have been removed because the project was discontinued upstream. Use Prosody's built-in `services.prosody.httpFileShare` support or Rusty Filer instead.
     '')
     (mkRemovedOptionModule [
       "services"
@@ -478,6 +485,10 @@ in
       The dhcpd6 module has been removed because ISC DHCP reached its end of life.
       See https://www.isc.org/blogs/isc-dhcp-eol/ for details.
       Please switch to a different implementation like kea or dnsmasq.
+    '')
+    (lib.mkRemovedOptionModule [ "services" "go-neb" ] ''
+      The Go-NEB project was discontinued by Matrix.org and archived in June
+      2023. Use matrix-hookshot or another maintained Matrix bot instead.
     '')
     (mkRemovedOptionModule [ "services" "gsignond" ] ''
       The corresponding package was unmaintained, abandoned upstream, used outdated library and thus removed from nixpkgs.

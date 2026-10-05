@@ -9,15 +9,15 @@
 
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "jsonschema-cli";
-  version = "0.56.0";
+  version = "0.58.5";
 
   src = fetchCrate {
     pname = "jsonschema-cli";
     inherit (finalAttrs) version;
-    hash = "sha256-RqTWoTeswkHQgX3AlHpMfDk23UP1g+M8+nVkWt9oqBs=";
+    hash = "sha256-/EjWzfXH8SfOPePipwwJCpItO/fvNLpRsybkNaMJyfQ=";
   };
 
-  cargoHash = "sha256-0MllKQrW9sQ0E4OF4RdB2sIZDdt0xNvJ4jtb4jC2eU8=";
+  cargoHash = "sha256-jdPLVMvW5G0emMl6YHYdSxSsm77E9HKkiPsKZQ1DTwU=";
 
   preCheck = ''
     export SSL_CERT_FILE=${cacert}/etc/ssl/certs/ca-bundle.crt

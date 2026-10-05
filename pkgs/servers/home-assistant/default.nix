@@ -251,7 +251,7 @@ let
   extraBuildInputs = extraPackages python3Packages;
 
   # Don't forget to run update-component-packages.py after updating
-  hassVersion = "2026.9.2";
+  hassVersion = "2026.9.4";
 
 in
 python3Packages.buildPythonApplication rec {
@@ -272,13 +272,13 @@ python3Packages.buildPythonApplication rec {
     owner = "home-assistant";
     repo = "core";
     tag = version;
-    hash = "sha256-JBGydiQydkIDPl1HybR7OK8Y1iuqht3olOlzY1tz/KQ=";
+    hash = "sha256-DoJ0Y0v6Q+ZoXGcLWHxiPw0ZVAELCTGp/9k3FlgZbm8=";
   };
 
   # Secondary source is pypi sdist for translations
   sdist = fetchPypi {
     inherit pname version;
-    hash = "sha256-CnnNTxNkK+pO0YczaZiRoNplH2s74fzCv7XEWdxvd+E=";
+    hash = "sha256-MKb9e2NJnJlZvpVnxLffuMFzFGbeZ6sm5VmKutGrv/c=";
   };
 
   build-system = with python3Packages; [
@@ -305,6 +305,9 @@ python3Packages.buildPythonApplication rec {
 
     # No scaring our users about our install method
     ./patches/nixos-was-never-supported.patch
+
+    # Fix portainer hang due to missing fixture autouse
+    ./patches/portainer-fixture-autouse.patch
 
     # Patch path to ffmpeg binary
     (replaceVars ./patches/ffmpeg-path.patch {

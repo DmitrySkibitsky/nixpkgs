@@ -30,13 +30,13 @@ let
 in
 stdenv.mkDerivation (finalAttrs: {
   pname = "element-desktop";
-  version = "1.12.26";
+  version = "1.12.29";
 
   src = fetchFromGitHub {
     owner = "element-hq";
     repo = "element-web";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-q9AV/jthbHnbESU/wvjdaCiMnIN6KQgAQ3cvEBvduTw=";
+    hash = "sha256-0LiasFrVMnMX1Z4TcP+Eti58X7+ICksqKnerQKj2ayI=";
   };
 
   pnpmDeps = fetchPnpmDeps {
@@ -47,7 +47,7 @@ stdenv.mkDerivation (finalAttrs: {
       ;
     inherit pnpm;
     fetcherVersion = 4;
-    hash = "sha256-R9YuNvrMurRaBxZqUPsUtZSFlSZ8nA7Bd/hlAMfAH+M=";
+    hash = "sha256-eLTMKzVgP1oSiat80ygWUH2zGF7ukKSLvOEGay/pr9Y=";
   };
 
   env.ELECTRON_SKIP_BINARY_DOWNLOAD = "1";
@@ -94,6 +94,9 @@ stdenv.mkDerivation (finalAttrs: {
 
     export VERSION=${finalAttrs.version}
 
+    # Not used here because we link element-web in installPhase, but electron-builder throws an error if it is not present
+    asar p ${element-web} apps/desktop/webapp.asar
+
     faketty pnpm -C apps/desktop exec nx build:ts
     faketty pnpm -C apps/desktop exec nx build:res
     pnpm -C apps/desktop exec electron-builder --dir -c.electronDist=electron-dist -c.electronVersion=${electron.version} -c.mac.identity=null
@@ -108,6 +111,9 @@ stdenv.mkDerivation (finalAttrs: {
     cp -r $seshat tmp-app/node_modules/matrix-seshat
 
     asar pack tmp-app "$packed"
+
+    # element-web is linked into the output during installPhase.
+    find ./dist -name webapp.asar -delete
 
     runHook postBuild
   '';
@@ -149,7 +155,7 @@ stdenv.mkDerivation (finalAttrs: {
   '';
 
   # The desktop item properties should be kept in sync with data from upstream:
-  # https://github.com/element-hq/element-desktop/blob/develop/package.json
+  # https://github.com/element-hq/element-web/blob/develop/apps/desktop/package.json
   desktopItems = [
     (makeDesktopItem {
       name = "element-desktop";

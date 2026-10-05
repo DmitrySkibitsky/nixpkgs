@@ -13,14 +13,14 @@ let
 in
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "copilot-language-server";
-  version = "1.543.0";
+  version = "1.551.2";
 
   strictDeps = true;
   __structuredAttrs = true;
 
   src = fetchzip {
     url = "https://github.com/github/copilot-language-server-release/releases/download/${finalAttrs.version}/copilot-language-server-js-${finalAttrs.version}.zip";
-    hash = "sha256-hhGqlvg7QDmzykdHDtFjF/DAcRtRVS/djjN7zZGE9tg=";
+    hash = "sha256-wDV1F8rzO49sp2XxcZdvwyWKSzu+2CWahZ2kLoVoGRE=";
     stripRoot = false;
   };
 

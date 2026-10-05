@@ -33,6 +33,7 @@
   pango,
   perl,
   pixman,
+  runtimeShellPackage,
   vips,
   buildPackages,
 }:
@@ -109,13 +110,16 @@ let
 in
 stdenv.mkDerivation (finalAttrs: {
   pname = "immich";
-  version = "3.2.2";
+  version = "3.2.4";
+
+  __structuredAttrs = true;
+  strictDeps = true;
 
   src = fetchFromGitHub {
     owner = "immich-app";
     repo = "immich";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-napG+EMZbbbeq7R8FtnuDsDwdpxItkwTVWztnw07DfA=";
+    hash = "sha256-/wWep6A/ryocuGMOElcD1lOEwT6tJDdwa5HAcCZUXSs=";
   };
 
   pnpmDeps = fetchPnpmDeps {
@@ -157,12 +161,16 @@ stdenv.mkDerivation (finalAttrs: {
     pixman
     # Required for sharp
     vips
+    # Required for some packages in node_modules
+    runtimeShellPackage
   ];
 
   env.SHARP_FORCE_GLOBAL_LIBVIPS = 1;
   env.ESBUILD_BINARY_PATH = lib.getExe esbuild';
   # fix for node-gyp, see https://github.com/nodejs/node-gyp/issues/1191#issuecomment-301243919
   env.npm_config_nodedir = nodejs;
+  # Prevent Python (via node-gyp) from writing bytecode to ensure build determinism
+  env.PYTHONDONTWRITEBYTECODE = "1";
 
   buildPhase = ''
     runHook preBuild

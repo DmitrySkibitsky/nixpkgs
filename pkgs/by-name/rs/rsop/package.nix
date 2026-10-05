@@ -7,20 +7,21 @@
   nix-update-script,
   testers,
   rsop,
+  stdenv, # for meta.broken
 }:
 
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "rsop";
-  version = "0.11.0";
+  version = "0.11.3";
 
   src = fetchFromCodeberg {
     owner = "heiko";
     repo = "rsop";
     rev = "rsop/v${finalAttrs.version}";
-    hash = "sha256-vZW4L3hm2vRRoLcxU631jiNrbk+w0hDaL4VXIrtP2aY=";
+    hash = "sha256-RqrHJuqgO+m6bWjDcjDaiAgnIJoyUEPxGG/VWQOc8KM=";
   };
 
-  cargoHash = "sha256-qrurMKwSs0w2D6KPto7tpsuLGuAJ9drKhdmIAbEaD9M=";
+  cargoHash = "sha256-mWjPIsir3h/OOHqAaEd64s+2CrowlmXpNa9U9LGKpuA=";
 
   nativeBuildInputs = [ pkg-config ];
 
@@ -44,5 +45,7 @@ rustPlatform.buildRustPackage (finalAttrs: {
     ];
     maintainers = with lib.maintainers; [ nikstur ];
     mainProgram = "rsop";
+    # last successful hydra build on darwin was in 2025
+    broken = stdenv.hostPlatform.isDarwin;
   };
 })

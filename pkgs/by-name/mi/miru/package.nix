@@ -14,9 +14,8 @@
 }:
 
 stdenv.mkDerivation (finalAttrs: {
-
   pname = "miru";
-  version = "0.9.0";
+  version = "0.11.0";
 
   __structuredAttrs = true;
   strictDeps = true;
@@ -25,7 +24,7 @@ stdenv.mkDerivation (finalAttrs: {
     owner = "Vaishnav-Sabari-Girish";
     repo = "miru";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-XisZviSoahwkMV93wR+/3qmGSBa8BXbcmbwgeRdLiTE=";
+    hash = "sha256-iCOOejuECykncjd6RCrJ4wpsaJKUg0RgFiBEQbprsiA=";
   };
 
   nativeBuildInputs = [
@@ -49,7 +48,7 @@ stdenv.mkDerivation (finalAttrs: {
     homepage = "https://codeberg.org/Vaishnav-Sabari-Girish/miru";
     changelog = "https://codeberg.org/Vaishnav-Sabari-Girish/miru/releases/tag/v${finalAttrs.version}";
     license = lib.licenses.mit;
-    maintainers = [ ];
+    maintainers = with lib.maintainers; [ yvnth ];
     platforms = lib.platforms.linux;
     mainProgram = "miru-daemon";
   };

@@ -1,7 +1,7 @@
 {
   cctools,
   copyDesktopItems,
-  electron_43,
+  electron_44,
   fetchFromGitHub,
   installShellFiles,
   lib,
@@ -14,6 +14,7 @@
   nodejs,
   pkg-config,
   python3,
+  spdx-license-list-data,
   stdenv,
   writeDarwinBundle,
   xcbuild,
@@ -28,7 +29,7 @@ stdenv.mkDerivation (
   finalAttrs:
   let
     appName = "T3 Code (Alpha)";
-    electron = electron_43;
+    electron = electron_44;
     pnpm = pnpm_11;
     desktopIcon =
       if stdenv.hostPlatform.isDarwin then
@@ -39,7 +40,7 @@ stdenv.mkDerivation (
   in
   {
     pname = "t3code-unwrapped";
-    version = "0.0.40";
+    version = "0.0.44";
     strictDeps = true;
     __structuredAttrs = true;
 
@@ -47,13 +48,17 @@ stdenv.mkDerivation (
       owner = "pingdotgg";
       repo = "t3code";
       tag = "v${finalAttrs.version}";
-      hash = "sha256-J8kXpfMfm03/DDAiWXJuANwUNDshhiUn7Lf9tV42Xfw=";
+      hash = "sha256-cSkGa6b+WGbXJ+lbpJ3tfCibtvaj7DwWhn66UGiXlWk=";
     };
 
     postPatch = ''
       substituteInPlace apps/web/vite.config.ts \
         --replace-fail 'const host = explicitHost || "localhost";' \
                        'const host = explicitHost || "127.0.0.1";'
+
+      mkdir -p .generated/third-party-licenses/spdx/v3.28.0
+      cp ${spdx-license-list-data.json}/json/details/*.json \
+        .generated/third-party-licenses/spdx/v3.28.0
     '';
 
     nativeBuildInputs = [
@@ -100,7 +105,7 @@ stdenv.mkDerivation (
         ;
 
       fetcherVersion = 4;
-      hash = "sha256-+UsoURSM4VP+CgF1fWROBEB85EuH+iJJM/xDPFigCKk=";
+      hash = "sha256-xdS9+PqIDULKIu3+lQRMabA23D0dxCEME96NhFggWPY=";
     };
 
     preBuild = ''
@@ -182,9 +187,9 @@ stdenv.mkDerivation (
     ''
     + ''
       mkdir --parents \
-        "$out"/share/icons/hicolor/scalable/apps
+        "$out"/share/icons/hicolor/{1024x1024,scalable}/apps
       install --mode=444 ${desktopIcon} \
-        "$out"/share/icons/t3code.png
+        "$out"/share/icons/hicolor/1024x1024/apps/t3code.png
       install --mode=444 assets/prod/logo.svg \
         "$out"/share/icons/hicolor/scalable/apps/t3code.svg
 
