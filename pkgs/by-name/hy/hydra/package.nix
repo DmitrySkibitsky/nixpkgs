@@ -45,13 +45,13 @@ let
   # Keep in sync with the nix input of https://github.com/NixOS/hydra/blob/master/flake.nix
   nixComponents = nixVersions.nixComponents_2_35;
 
-  version = "0-unstable-2026-09-09";
+  version = "0-unstable-2026-10-08";
 
   src = fetchFromGitHub {
     owner = "NixOS";
     repo = "hydra";
-    rev = "1d1d8b1c6fdc08444a514f383b291228f19d72d8";
-    hash = "sha256-wbPw1mlCrZODGxWFSXkOjCtKRWYeZYcs/W24yay3tKM=";
+    rev = "35d9058fa00edcc9c4a1d3489f929a9cbfc75208";
+    hash = "sha256-or1nAWkxlPbKegdarYmXKjQfNixpxb4Dlrbp2jrUDdk=";
   };
 
   nix-perl = callPackage ./nix-perl.nix {
@@ -68,12 +68,14 @@ let
       ]
       ++ (with perlPackages; [
         AuthenSASL
+        CacheFastMmap
         CatalystActionREST
         CatalystAuthenticationStoreDBIxClass
         CatalystAuthenticationStoreLDAP
         CatalystDevel
         CatalystPluginAccessLog
         CatalystPluginAuthorizationRoles
+        CatalystPluginCache
         CatalystPluginCaptcha
         CatalystPluginPrometheusTiny
         CatalystPluginSessionStateCookie
@@ -86,8 +88,10 @@ let
         CatalystXRoleApplicator
         CatalystXScriptServerStarman
         CryptPassphrase
+        CryptJWT
         CryptPassphraseArgon2
         CryptRandPasswd
+        CryptURandom
         DataDump
         DateTime
         DBDPg
@@ -131,6 +135,7 @@ let
         TextTable
         URIdb
         UUIDURandom
+        WWWMechanize
         XMLSimple
         YAML
       ])

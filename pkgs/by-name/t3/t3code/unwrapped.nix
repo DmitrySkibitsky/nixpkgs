@@ -40,7 +40,7 @@ stdenv.mkDerivation (
   in
   {
     pname = "t3code-unwrapped";
-    version = "0.0.44";
+    version = "0.0.45";
     strictDeps = true;
     __structuredAttrs = true;
 
@@ -48,7 +48,7 @@ stdenv.mkDerivation (
       owner = "pingdotgg";
       repo = "t3code";
       tag = "v${finalAttrs.version}";
-      hash = "sha256-cSkGa6b+WGbXJ+lbpJ3tfCibtvaj7DwWhn66UGiXlWk=";
+      hash = "sha256-8drTHjFqa2vJ96jhpRZXmNbtbXtKk1q40jOEp9dohNc=";
     };
 
     postPatch = ''
@@ -105,7 +105,7 @@ stdenv.mkDerivation (
         ;
 
       fetcherVersion = 4;
-      hash = "sha256-xdS9+PqIDULKIu3+lQRMabA23D0dxCEME96NhFggWPY=";
+      hash = "sha256-2dGEHOQrnidTei54NlZTJh5u5/i810hb2LddK4XfUNQ=";
     };
 
     preBuild = ''
@@ -199,6 +199,13 @@ stdenv.mkDerivation (
     postInstall = lib.optionalString (stdenv.buildPlatform.canExecute stdenv.hostPlatform) ''
       for shell in bash fish zsh; do
         installShellCompletion --cmd t3 --"$shell" <("$out/bin/t3" --completions "$shell")
+      done
+    '';
+
+    postFixup = lib.optionalString stdenv.hostPlatform.isLinux ''
+      # Electron's Node runtime does not provide libstdc++ for the bundled node-pty prebuild
+      for module in "$out"/libexec/t3code/node_modules/.pnpm/node-pty@*/node_modules/node-pty/prebuilds/linux-${stdenv.hostPlatform.node.arch}/pty.node; do
+        patchelf --add-rpath ${lib.makeLibraryPath [ stdenv.cc.cc.lib ]} "$module"
       done
     '';
 

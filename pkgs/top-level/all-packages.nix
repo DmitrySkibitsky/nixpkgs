@@ -1047,41 +1047,6 @@ with pkgs;
 
   ### APPLICATIONS/VERSION-MANAGEMENT
 
-  # The full-featured Git.
-  gitFull = git.override {
-    svnSupport = stdenv.buildPlatform == stdenv.hostPlatform;
-    guiSupport = true;
-    sendEmailSupport = stdenv.buildPlatform == stdenv.hostPlatform;
-    withSsh = true;
-    withLibsecret = !stdenv.hostPlatform.isDarwin;
-  };
-
-  # Git with SVN support, but without GUI.
-  gitSVN = lowPrio (git.override { svnSupport = true; });
-
-  git-doc =
-    # doc attribute is not present at least for pkgsLLVM
-    if (gitFull ? doc) then
-      lib.addMetaAttrs {
-        description = "Additional documentation for Git";
-        longDescription = ''
-          This package contains additional documentation (HTML and text files) that
-          is referenced in the man pages of Git.
-        '';
-      } gitFull.doc
-    else
-      throw "'git-doc' can't be evaluated as 'gitFull' does not expose 'doc' attribute";
-
-  gitMinimal = git.override {
-    withManual = false;
-    osxkeychainSupport = false;
-    pythonSupport = false;
-    perlSupport = false;
-    rustSupport = false; # Needed for bootstrap
-    withpcre2 = false;
-    curl = if stdenv.hostPlatform.isFreeBSD then curlMinimal else curl; # Needed for FreeBSD bootstrap
-  };
-
   bump2version = with python3Packages; toPythonApplication bump2version;
 
   datalad = with python3Packages; toPythonApplication datalad;
@@ -1440,8 +1405,6 @@ with pkgs;
     charles4
     charles5
     ;
-
-  libtensorflow = python3.pkgs.tensorflow-build.libtensorflow;
 
   libtorch-bin = callPackage ../development/libraries/science/math/libtorch/bin.nix { };
 
@@ -1879,7 +1842,7 @@ with pkgs;
 
   cudaPackages_13 = cudaPackages_13_4;
 
-  cudaPackages = recurseIntoAttrs cudaPackages_12;
+  cudaPackages = recurseIntoAttrs cudaPackages_13;
 
   dconf2nix = callPackage ../development/tools/haskell/dconf2nix { };
 
@@ -1920,6 +1883,11 @@ with pkgs;
     tracy_0_11
     tracy_0_12
     tracy_0_13
+    ;
+
+  inherit (callPackages ../by-name/so/solana-platform-tools/package-versions.nix { })
+    solana-platform-tools_154
+    solana-platform-tools_157
     ;
 
   uusi = haskell.lib.compose.justStaticExecutables haskellPackages.uusi;
@@ -2820,6 +2788,8 @@ with pkgs;
     isDesktopVariant = true;
   };
 
+  stirling-pdf-free = stirling-pdf.override { withAdditionalFeatures = false; };
+
   stm32loader = with python3Packages; toPythonApplication stm32loader;
 
   solc-select = with python3Packages; toPythonApplication solc-select;
@@ -3382,84 +3352,99 @@ with pkgs;
     }
   );
 
-  gnat14 = wrapCC (
-    gcc14.cc.override {
-      name = "gnat";
-      langC = true;
-      langCC = false;
-      langAda = true;
-      profiledCompiler = false;
-      # As per upstream instructions building a cross compiler
-      # should be done with a (native) compiler of the same version.
-      # If we are cross-compiling GNAT, we may as well do the same.
-      gnat-bootstrap =
-        if stdenv.hostPlatform == stdenv.targetPlatform && stdenv.buildPlatform == stdenv.hostPlatform then
-          buildPackages.gnat-bootstrap14
-        else
-          buildPackages.gnat14;
-      stdenv =
-        if
-          stdenv.hostPlatform == stdenv.targetPlatform
-          && stdenv.buildPlatform == stdenv.hostPlatform
-          && stdenv.buildPlatform.isDarwin
-        then
-          overrideCC gccStdenv gnat-bootstrap14
-        else
-          stdenv;
+  gnat14 = wrapCCWith (
+    {
+      cc = gcc14.cc.override {
+        name = "gnat";
+        langC = true;
+        langCC = false;
+        langAda = true;
+        profiledCompiler = false;
+        # As per upstream instructions building a cross compiler
+        # should be done with a (native) compiler of the same version.
+        # If we are cross-compiling GNAT, we may as well do the same.
+        gnat-bootstrap =
+          if stdenv.hostPlatform == stdenv.targetPlatform && stdenv.buildPlatform == stdenv.hostPlatform then
+            buildPackages.gnat-bootstrap14
+          else
+            buildPackages.gnat14;
+        stdenv =
+          if
+            stdenv.hostPlatform == stdenv.targetPlatform
+            && stdenv.buildPlatform == stdenv.hostPlatform
+            && stdenv.buildPlatform.isDarwin
+          then
+            overrideCC gccStdenv gnat-bootstrap14
+          else
+            stdenv;
+      };
+    }
+    // lib.optionalAttrs stdenv.targetPlatform.isDarwin {
+      apple-sdk = apple-sdk_15;
     }
   );
 
-  gnat15 = wrapCC (
-    gcc15.cc.override {
-      name = "gnat";
-      langC = true;
-      langCC = false;
-      langAda = true;
-      profiledCompiler = false;
-      # As per upstream instructions building a cross compiler
-      # should be done with a (native) compiler of the same version.
-      # If we are cross-compiling GNAT, we may as well do the same.
-      gnat-bootstrap =
-        if stdenv.hostPlatform == stdenv.targetPlatform && stdenv.buildPlatform == stdenv.hostPlatform then
-          buildPackages.gnat-bootstrap15
-        else
-          buildPackages.gnat15;
-      stdenv =
-        if
-          stdenv.hostPlatform == stdenv.targetPlatform
-          && stdenv.buildPlatform == stdenv.hostPlatform
-          && stdenv.buildPlatform.isDarwin
-        then
-          overrideCC gccStdenv gnat-bootstrap15
-        else
-          stdenv;
+  gnat15 = wrapCCWith (
+    {
+      cc = gcc15.cc.override {
+        name = "gnat";
+        langC = true;
+        langCC = false;
+        langAda = true;
+        profiledCompiler = false;
+        # As per upstream instructions building a cross compiler
+        # should be done with a (native) compiler of the same version.
+        # If we are cross-compiling GNAT, we may as well do the same.
+        gnat-bootstrap =
+          if stdenv.hostPlatform == stdenv.targetPlatform && stdenv.buildPlatform == stdenv.hostPlatform then
+            buildPackages.gnat-bootstrap15
+          else
+            buildPackages.gnat15;
+        stdenv =
+          if
+            stdenv.hostPlatform == stdenv.targetPlatform
+            && stdenv.buildPlatform == stdenv.hostPlatform
+            && stdenv.buildPlatform.isDarwin
+          then
+            overrideCC gccStdenv gnat-bootstrap15
+          else
+            stdenv;
+      };
+    }
+    // lib.optionalAttrs stdenv.targetPlatform.isDarwin {
+      apple-sdk = apple-sdk_15;
     }
   );
 
-  gnat16 = wrapCC (
-    gcc16.cc.override {
-      name = "gnat";
-      langC = true;
-      langCC = false;
-      langAda = true;
-      profiledCompiler = false;
-      # As per upstream instructions building a cross compiler
-      # should be done with a (native) compiler of the same version.
-      # If we are cross-compiling GNAT, we may as well do the same.
-      gnat-bootstrap =
-        if stdenv.hostPlatform == stdenv.targetPlatform && stdenv.buildPlatform == stdenv.hostPlatform then
-          buildPackages.gnat-bootstrap16
-        else
-          buildPackages.gnat16;
-      stdenv =
-        if
-          stdenv.hostPlatform == stdenv.targetPlatform
-          && stdenv.buildPlatform == stdenv.hostPlatform
-          && stdenv.buildPlatform.isDarwin
-        then
-          overrideCC gccStdenv gnat-bootstrap16
-        else
-          stdenv;
+  gnat16 = wrapCCWith (
+    {
+      cc = gcc16.cc.override {
+        name = "gnat";
+        langC = true;
+        langCC = false;
+        langAda = true;
+        profiledCompiler = false;
+        # As per upstream instructions building a cross compiler
+        # should be done with a (native) compiler of the same version.
+        # If we are cross-compiling GNAT, we may as well do the same.
+        gnat-bootstrap =
+          if stdenv.hostPlatform == stdenv.targetPlatform && stdenv.buildPlatform == stdenv.hostPlatform then
+            buildPackages.gnat-bootstrap16
+          else
+            buildPackages.gnat16;
+        stdenv =
+          if
+            stdenv.hostPlatform == stdenv.targetPlatform
+            && stdenv.buildPlatform == stdenv.hostPlatform
+            && stdenv.buildPlatform.isDarwin
+          then
+            overrideCC gccStdenv gnat-bootstrap16
+          else
+            stdenv;
+      };
+    }
+    // lib.optionalAttrs stdenv.targetPlatform.isDarwin {
+      apple-sdk = apple-sdk_15;
     }
   );
 
@@ -4373,9 +4358,6 @@ with pkgs;
     luajit_openresty
     ;
 
-  lua5 = lua5_2_compat;
-  lua = lua5;
-
   lua51Packages = recurseIntoAttrs lua5_1.pkgs;
   lua52Packages = recurseIntoAttrs lua5_2.pkgs;
   lua53Packages = recurseIntoAttrs lua5_3.pkgs;
@@ -4383,12 +4365,10 @@ with pkgs;
   lua55Packages = recurseIntoAttrs lua5_5.pkgs;
   luajitPackages = recurseIntoAttrs luajit.pkgs;
 
-  luaPackages = lua52Packages;
-
   luajit = if stdenv.hostPlatform.isRiscV64 then luajit_openresty else luajit_2_1;
 
-  luarocks = luaPackages.luarocks;
-  luarocks-nix = luaPackages.luarocks-nix;
+  luarocks = lua52Packages.luarocks;
+  luarocks-nix = lua52Packages.luarocks-nix;
 
   ### END OF LUA
 
@@ -4601,8 +4581,16 @@ with pkgs;
   };
 
   tcl = tcl-8_6;
-  tcl-8_6 = callPackage ../development/interpreters/tcl/8.6.nix { };
-  tcl-9_0 = callPackage ../development/interpreters/tcl/9.0.nix { };
+  inherit
+    ({
+      tcl-8_6 = callPackage ../development/interpreters/tcl/8.6.nix { };
+      tcl-9_0 = callPackage ../development/interpreters/tcl/9.0.nix { };
+      tcl-9_1 = callPackage ../development/interpreters/tcl/9.1.nix { };
+    })
+    tcl-8_6
+    tcl-9_0
+    tcl-9_1
+    ;
 
   tclPackages = dontRecurseIntoAttrs tcl8Packages;
   # We don't need minor-versioned package sets thanks to the tcl stubs mechanism.
@@ -5191,7 +5179,7 @@ with pkgs;
 
   radare2 = callPackage ../development/tools/analysis/radare2 (
     {
-      lua = lua5;
+      lua = lua5_2_compat;
     }
     // (config.radare or { })
   );
@@ -5380,6 +5368,7 @@ with pkgs;
     boost189
     boost190
     boost191
+    boost192
     ;
 
   boost = boost191;
@@ -6615,9 +6604,16 @@ with pkgs;
   tinyxml = callPackage ../development/libraries/tinyxml/2.6.2.nix { };
 
   tk = tk-8_6;
-
-  tk-9_0 = callPackage ../development/libraries/tk/9.0.nix { tcl = tcl-9_0; };
-  tk-8_6 = callPackage ../development/libraries/tk/8.6.nix { };
+  inherit
+    ({
+      tk-8_6 = callPackage ../development/libraries/tk/8.6.nix { };
+      tk-9_0 = callPackage ../development/libraries/tk/9.0.nix { tcl = tcl-9_0; };
+      tk-9_1 = callPackage ../development/libraries/tk/9.1.nix { tcl = tcl-9_1; };
+    })
+    tk-8_6
+    tk-9_0
+    tk-9_1
+    ;
 
   tpm2-tss = callPackage ../development/libraries/tpm2-tss {
     autoreconfHook = buildPackages.autoreconfHook269;
@@ -7318,6 +7314,8 @@ with pkgs;
 
   nsdiff = perlPackages.nsdiff;
 
+  opencloud-production = callPackage ../by-name/op/opencloud/production.nix { };
+
   openresty = callPackage ../servers/http/openresty {
     zlib-ng = zlib;
     withPerl = false;
@@ -7483,6 +7481,8 @@ with pkgs;
 
   virtualenv-clone = with python3Packages; toPythonApplication virtualenv-clone;
 
+  whisparr = whisparr_2;
+
   mkfontdir = mkfontscale;
   xcbproto = xcb-proto;
 
@@ -7574,7 +7574,7 @@ with pkgs;
 
   conky = callPackage ../os-specific/linux/conky (
     {
-      lua = lua5_4;
+      lua = lua5_5;
       inherit (linuxPackages.nvidia_x11.settings) libXNVCtrl;
     }
     // config.conky or { }
@@ -7858,6 +7858,7 @@ with pkgs;
     withImportd = false;
     withImds = false;
     withLibBPF = false;
+    vmlinux-btf = null;
     withLibidn2 = false;
     withLocaled = false;
     withLogind = false;
@@ -8527,22 +8528,6 @@ with pkgs;
     freeoffice
     ;
 
-  gimp2 = callPackage ../applications/graphics/gimp/2.0 {
-    lcms = lcms2;
-    stdenv = if stdenv.cc.isGNU then gcc14Stdenv else stdenv;
-  };
-
-  gimp2-with-plugins = callPackage ../applications/graphics/gimp/wrapper.nix {
-    gimpPlugins = gimp2Plugins;
-    plugins = null; # All packaged plugins enabled, if not explicit plugin list supplied
-  };
-
-  gimp2Plugins = recurseIntoAttrs (
-    callPackage ../applications/graphics/gimp/plugins {
-      gimp = gimp2;
-    }
-  );
-
   gimp = callPackage ../applications/graphics/gimp {
     lcms = lcms2;
   };
@@ -9161,9 +9146,6 @@ with pkgs;
   thunderbird-153-unwrapped = thunderbirdPackages.thunderbird-153;
   thunderbird-153 = wrapThunderbird thunderbirdPackages.thunderbird-153 { };
 
-  thunderbird-140-unwrapped = thunderbirdPackages.thunderbird-140;
-  thunderbird-140 = wrapThunderbird thunderbirdPackages.thunderbird-140 { };
-
   thunderbird-bin = thunderbird-latest-bin;
   thunderbird-latest-bin = wrapThunderbird thunderbird-latest-bin-unwrapped {
     pname = "thunderbird-bin";
@@ -9571,7 +9553,7 @@ with pkgs;
     withGui = false;
   };
 
-  napari = with python312Packages; toPythonApplication napari;
+  napari = with python3Packages; toPythonApplication napari;
 
   pycoin = with python3Packages; toPythonApplication pycoin;
 
@@ -9758,9 +9740,7 @@ with pkgs;
 
   openraPackages = recurseIntoAttrs (callPackage ../by-name/op/openra/engines { });
 
-  papermcServers = callPackages ../games/papermc { };
-
-  papermc = papermcServers.papermc;
+  papermcServers = callPackage ../by-name/pa/papermc/versions.nix { };
 
   pokerth-server = pokerth.override { target = "server"; };
 
@@ -10296,8 +10276,6 @@ with pkgs;
   libjack2 = jack2.override { prefix = "lib"; };
 
   jack_autoconnect = jack-autoconnect;
-
-  j2cli = with python311Packages; toPythonApplication j2cli;
 
   j2lint = with python3Packages; toPythonApplication j2lint;
 

@@ -11,8 +11,7 @@
   libapparmor,
   libseccomp,
   libselinux,
-  # TODO: investigate why changing from `systemd` to `systemdMinimal` breaks `podman logs`
-  systemd,
+  systemdLibs,
   nixosTests,
   python3,
   makeBinaryWrapper,
@@ -40,15 +39,18 @@
   coreutils,
   runtimeShell,
 }:
+let
+  systemdLibs' = systemdLibs.override { withCompression = true; };
+in
 buildGoModule (finalAttrs: {
   pname = "podman";
-  version = "5.8.7";
+  version = "5.8.8";
 
   src = fetchFromGitHub {
     owner = "podman-container-tools";
     repo = "podman";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-E13EjBqCK/ABVxWJSZKn6vqpYXjTqqoBR5N7YnOqURI=";
+    hash = "sha256-fl2/HyUh2EBbSw6O50H04Bltu2ZNF1Fay9XNNzKVpSE=";
   };
 
   patches = [
@@ -82,7 +84,7 @@ buildGoModule (finalAttrs: {
     libapparmor
     libseccomp
     libselinux
-    systemd
+    systemdLibs'
   ];
 
   env = {
@@ -134,7 +136,7 @@ buildGoModule (finalAttrs: {
 
   postFixup = lib.optionalString stdenv.hostPlatform.isLinux ''
     RPATH=$(patchelf --print-rpath $out/bin/.podman-wrapped)
-    patchelf --set-rpath "${lib.makeLibraryPath [ systemd ]}":$RPATH $out/bin/.podman-wrapped
+    patchelf --set-rpath "${lib.makeLibraryPath [ systemdLibs' ]}":$RPATH $out/bin/.podman-wrapped
     substituteInPlace "$out/share/systemd/user/podman-user-wait-network-online.service" \
       --replace-fail sleep '${coreutils}/bin/sleep' \
       --replace-fail /bin/sh '${runtimeShell}'

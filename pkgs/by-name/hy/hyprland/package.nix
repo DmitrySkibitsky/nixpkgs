@@ -4,7 +4,7 @@
   stdenvAdapters,
   fetchFromGitHub,
   pkg-config,
-  makeWrapper,
+  makeBinaryWrapper,
   cmake,
   aquamarine,
   binutils,
@@ -37,7 +37,7 @@
   python3,
   re2,
   readline,
-  systemd,
+  systemdLibs,
   tomlplusplus,
   udis86,
   uwsm,
@@ -52,7 +52,7 @@
   xwayland,
   debug ? false,
   enableXWayland ? true,
-  withSystemd ? lib.meta.availableOn gcc16Stdenv.hostPlatform systemd,
+  withSystemd ? lib.meta.availableOn gcc16Stdenv.hostPlatform systemdLibs,
   wrapRuntimeDeps ? true,
 }:
 let
@@ -137,7 +137,7 @@ customStdenv.mkDerivation (finalAttrs: {
   nativeBuildInputs = [
     hyprwayland-scanner
     hyprwire
-    makeWrapper
+    makeBinaryWrapper
     cmake
     pkg-config
     wayland-scanner
@@ -190,7 +190,7 @@ customStdenv.mkDerivation (finalAttrs: {
       libxdmcp
       xwayland
     ])
-    (optionals withSystemd [ systemd ])
+    (optionals withSystemd [ systemdLibs ])
   ];
 
   cmakeBuildType = if debug then "Debug" else "RelWithDebInfo";

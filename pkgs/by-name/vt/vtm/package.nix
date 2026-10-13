@@ -5,7 +5,7 @@
   cmake,
   freetype,
   harfbuzz,
-  lua5_4,
+  lua5_5,
   lunasvg,
   plutovg,
   stb,
@@ -13,13 +13,16 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "vtm";
-  version = "2026.09.29";
+  version = "2026.10.05";
+
+  strictDeps = true;
+  __structuredAttrs = true;
 
   src = fetchFromGitHub {
     owner = "directvt";
     repo = "vtm";
     rev = "v${finalAttrs.version}";
-    hash = "sha256-SXVvSnGq9rTCw8SG3jO1f4KAmf5kf5XPxY2fxk0kdlk=";
+    hash = "sha256-SQL3fBA7/PcHFt603y3f/q0wzhD+0VynTouOuNMrCM4=";
   };
 
   nativeBuildInputs = [
@@ -29,7 +32,7 @@ stdenv.mkDerivation (finalAttrs: {
   buildInputs = [
     freetype
     harfbuzz
-    lua5_4
+    lua5_5
     lunasvg
     plutovg
     stb

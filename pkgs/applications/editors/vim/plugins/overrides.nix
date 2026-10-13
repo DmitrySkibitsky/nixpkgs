@@ -27,6 +27,7 @@
   fzy,
   gawk,
   git,
+  gh,
   glow,
   helm-ls,
   himalaya,
@@ -258,6 +259,17 @@ assertNoAdditions {
   asyncrun-vim = super.asyncrun-vim.overrideAttrs {
     # Optional toggleterm integration
     checkInputs = [ self.toggleterm-nvim ];
+  };
+
+  atlas-nvim = super.atlas-nvim.overrideAttrs {
+    runtimeDeps = [
+      curl
+      gitMinimal
+    ];
+    checkInputs = with self; [
+      fzf-lua
+      snacks-nvim
+    ];
   };
 
   augment-vim = super.augment-vim.overrideAttrs (old: {
@@ -2847,6 +2859,15 @@ assertNoAdditions {
     ];
   };
 
+  neotest-busted = super.neotest-busted.overrideAttrs {
+    dependencies = with self; [
+      neotest
+      nvim-nio
+    ];
+    # Helper scripts are run in the project's Busted/LuaRocks environment.
+    nvimRequireCheck = "neotest-busted";
+  };
+
   neotest-ctest = super.neotest-ctest.overrideAttrs {
     dependencies = with self; [
       neotest
@@ -4958,8 +4979,8 @@ assertNoAdditions {
 
   vim-agda = super.vim-agda.overrideAttrs {
     preFixup = ''
-      substituteInPlace "$out"/autoload/agda.vim \
-        --replace-fail "jobstart(['agda'" "jobstart(['${agda}/bin/agda'"
+      substituteInPlace "$out"/ftplugin/agda.vim \
+        --replace-fail "let g:agda_executable = 'agda'" "let g:agda_executable = '${agda}/bin/agda'"
     '';
   };
 
@@ -5096,6 +5117,16 @@ assertNoAdditions {
       license = lib.licenses.vim;
     };
   });
+
+  vim-dadbod-manager-ui = super.vim-dadbod-manager-ui.overrideAttrs {
+    # Only vim-dadbod: the drawer this plugin extends is vendored, and upstream
+    # states that a separate vim-dadbod-ui "must not be installed next to it",
+    # so it is deliberately not listed here.
+    dependencies = [ self.vim-dadbod ];
+
+    doInstallCheck = true;
+    vimCommandCheck = "DBManager";
+  };
 
   vim-dadbod-ui = super.vim-dadbod-ui.overrideAttrs {
     dependencies = [ self.vim-dadbod ];

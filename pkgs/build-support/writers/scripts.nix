@@ -877,16 +877,16 @@ rec {
   */
   writeNu =
     name: argsOrScript:
-    # Separate the shebang from doc comments attached to `main`.
     if lib.isAttrs argsOrScript && !lib.isDerivation argsOrScript then
-      script:
       makeScriptWriter (
-        argsOrScript // { interpreter = "${lib.getExe pkgs.nushell} --no-config-file"; }
-      ) name "\n${script}"
+        argsOrScript
+        // {
+          # Separate the shebang from doc comments attached to `main`.
+          interpreter = "${lib.getExe pkgs.nushell} --no-config-file\n";
+        }
+      ) name
     else
-      makeScriptWriter {
-        interpreter = "${lib.getExe pkgs.nushell} --no-config-file";
-      } name "\n${argsOrScript}";
+      writeNu name { } argsOrScript;
 
   /**
     Like writeScriptBin but the first line is a shebang to nu
@@ -1019,7 +1019,7 @@ rec {
 
     :::
   */
-  writeLua = makeLuaWriter pkgs.lua pkgs.luaPackages buildPackages.luaPackages;
+  writeLua = makeLuaWriter pkgs.lua5_2_compat pkgs.lua52Packages buildPackages.lua52Packages;
 
   writeLuaBin = name: writeLua "/bin/${name}";
 
