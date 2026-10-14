@@ -208,7 +208,7 @@ overrides the user's own global instruction ("never add Co-Authored-By: Claude o
 attribution") — that global rule holds for every other repo, but in `nixpkgs` specifically the
 `Assisted-by:` trailer must be added by default, without asking each time.
 
-Also add a short, separate "AI disclosure" section to the PR body itself (see template below) — the
+Also add a short, separate AI disclosure paragraph to the PR body itself (see step 5) — the
 policy treats commit-trailer disclosure and PR-body disclosure as two separate requirements.
 
 ## 5. Push and open the PR
@@ -219,30 +219,50 @@ gh pr create --repo NixOS/nixpkgs --base master --head <your-github-user>:<branc
   --title "<pkg-name>: <from> -> <to>" --body-file <body-file>
 ```
 
-PR body template — fill in every checkbox honestly, don't tick something you didn't actually do:
+### PR body — build it from the repo's real template, never retype it
 
-```markdown
-## Summary
+The PR body **must** be the verbatim contents of `.github/PULL_REQUEST_TEMPLATE.md` from the current
+checkout (the template changes over time — platforms, test categories and release-notes checkboxes
+have all moved before). Do **not** write the checklist from memory or from an older copy of it, do not
+paraphrase it, and do not add your own headings or checklist items to it.
 
-<what changed and why, with a link to the upstream release/changelog>
+```bash
+BODY=<scratchpad>/pr-body.md
+cp .github/PULL_REQUEST_TEMPLATE.md "$BODY"
+```
 
-## Pull request template
+Then edit `$BODY` in exactly these ways, and no others:
 
-- [ ] Tested using sandboxing (nix.conf: `sandbox = true` on Linux, on by default)
-- [ ] Built on platform(s)
-  - [ ] x86_64-linux
-  - [ ] aarch64-linux
-  - [ ] x86_64-darwin
-  - [ ] aarch64-darwin
-- [ ] Tested via one or more NixOS test(s) if existing and applicable for the change (look inside nixos/tests)
-- [ ] Tested compilation of all pkgs that depend on this change using `nixpkgs-review`
-- [ ] Tested execution of all binary files (usually in `./result/bin/`)
-- [ ] Meets Nixpkgs contribution standards
+1. **Summary** — insert it at the very top, *above* the template's first `<!-- ... -->` comment (that
+   comment's `^ ... ^` arrows point up at this spot). Say what changed and why, and link the upstream
+   release/changelog (the template asks for a changelog link on package updates).
+2. **AI disclosure** — directly below the summary, still above the comment, add one short paragraph.
+   `CONTRIBUTING.md`'s Automation/AI policy requires PR summaries to be disclosed separately from the
+   commits (the `Assisted-by:` trailer covers only the commit):
 
-## AI disclosure
+   ```markdown
+   This PR was prepared with the assistance of Claude Code (<model name/version>). All changes were
+   reviewed and are understood by me before submission.
+   ```
+3. **Checkboxes** — change `[ ]` to `[x]` only for items that were actually done in this session, and
+   leave every other line, comment, and link reference definition untouched. Do not tick something
+   you didn't do. Do not delete unchecked items or the `<!-- ... -->` comments (the template itself
+   says "do not remove the template, even when nothing is checked"). Do not append notes to checklist
+   lines; put any extra context in the summary instead. Typical mapping:
+   - `Built on platform:` → tick only the platform(s) built here (usually `x86_64-linux`).
+   - `[Package tests] at passthru.tests` / `[NixOS tests]` → tick only if you really ran them.
+   - `Ran nixpkgs-review on this PR` → tick if step 3's run passed.
+   - `Tested basic functionality of all binary files` → tick if the step 3 smoke test passed.
+   - `Nixpkgs Release Notes` / `NixOS Release Notes` → leave unchecked unless the change is
+     major/breaking (or adds/changes a module).
+   - `Fits [CONTRIBUTING.md], ...` and `Follows the [automation/AI policy]` → tick once the commit
+     carries `Assisted-by:` and the AI disclosure paragraph is in the body.
 
-This PR was prepared with the assistance of Claude Code (<model name/version>). All changes were
-reviewed and are understood by me before submission. See the `Assisted-by:` trailer on the commit.
+Before `gh pr create`, sanity-check that nothing but those edits differ from the template:
+
+```bash
+diff <(sed -n '/^## Things done/,$p' .github/PULL_REQUEST_TEMPLATE.md | sed 's/\[x\]/[ ]/') \
+     <(sed -n '/^## Things done/,$p' "$BODY" | sed 's/\[x\]/[ ]/') && echo "template intact"
 ```
 
 ## 6. After opening: don't expect to self-merge
@@ -296,3 +316,9 @@ something to fix immediately.
    section required by `CONTRIBUTING.md`'s Automation/AI policy, which the repo's own bot enforces
    via the `llm-assisted` label. Fix: step 4 above. (PR #563503, initially opened without it, fixed
    by amending the commit and editing the PR body.)
+5. **PR body that doesn't match the real template.** Cause: this file used to carry a hand-written
+   approximation of the checklist ("Pull request template" heading, sandboxing/x86_64-darwin items,
+   annotated checkbox lines) instead of the repo's actual `.github/PULL_REQUEST_TEMPLATE.md`. A
+   maintainer called it out on PR #573650: "please have your harness use the actual pr template
+   instead writing something kinda like it". Fix: step 5 now copies the real template file and only
+   adds the summary, the AI disclosure paragraph, and ticked boxes.
