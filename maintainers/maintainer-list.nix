@@ -117,6 +117,12 @@
     githubId = 9675338;
     keys = [ { fingerprint = "F466 A548 AD3F C1F1 8C88  4576 8702 7528 B006 D66D"; } ];
   };
+  _0x4bs3nt = {
+    email = "hi@4bs3nt.com";
+    name = "4bs3nt";
+    github = "0x4bs3nt";
+    githubId = 100233775;
+  };
   _0x5a4 = {
     email = "bej86nug@hhu.de";
     name = "0x5a4";
@@ -5029,6 +5035,13 @@
     github = "ch4og";
     githubId = 32384814;
     name = "Nikita Mitasov";
+  };
+  chandradeepdey = {
+    email = "codesigning@chandradeepdey.com";
+    github = "chandradeepdey";
+    githubId = 21266577;
+    name = "Chandradeep Dey";
+    keys = [ { fingerprint = "DA8C CB12 605E BB2E C3BC  8AC6 FCA3 1140 D16C 4C37"; } ];
   };
   changlinli = {
     email = "mail@changlinli.com";
@@ -10919,6 +10932,12 @@
     github = "greydot";
     githubId = 7385287;
     name = "Lana Black";
+  };
+  greyxp1 = {
+    email = "greyxp2@proton.me";
+    github = "greyxp1";
+    githubId = 120752906;
+    name = "Grey";
   };
   grgi = {
     name = "Gregor Giesen";
@@ -31133,6 +31152,12 @@
     github = "vojta001";
     githubId = 7038383;
     name = "Vojta Káně";
+  };
+  vojtechstep = {
+    email = "code@vojtechstep.eu";
+    github = "VojtechStep";
+    githubId = 15523887;
+    name = "Vojta Štěpančík";
   };
   vokinn = {
     github = "vokinn";
