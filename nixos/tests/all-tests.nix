@@ -689,7 +689,14 @@ in
   flannel = runTestOn [ "x86_64-linux" ] ./flannel.nix;
   flap-alerted = runTest ./flap-alerted.nix;
   flaresolverr = runTest ./flaresolverr.nix;
-  flarum = runTest ./flarum.nix;
+  flarum_1 = runTest {
+    imports = [ ./flarum.nix ];
+    _module.args.package = pkgs.flarum_1;
+  };
+  flarum_2 = runTest {
+    imports = [ ./flarum.nix ];
+    _module.args.package = pkgs.flarum_2;
+  };
   flood = runTest ./flood.nix;
   fluent-bit = runTest ./fluent-bit.nix;
   fluentd = runTest ./fluentd.nix;
@@ -2099,7 +2106,7 @@ in
   xterm = runTest ./xterm.nix;
   xxh = runTest ./xxh.nix;
   yarr = runTest ./yarr.nix;
-  yb = pkgs.callPackage ./yb.nix { inherit (pkgs.yb.passthru) ybPivHarnessTests testFixtures; };
+  yb = pkgs.callPackage ./yb.nix { inherit (pkgs.yb.passthru) ybPivHarnessTests; };
   ydotool = import ./ydotool.nix {
     inherit lib runTest;
   };

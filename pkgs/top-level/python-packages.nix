@@ -5310,7 +5310,7 @@ self: super: with self; {
 
   duckdb-engine = callPackage ../development/python-modules/duckdb-engine { };
 
-  duct-py = callPackage ../development/python-modules/duct-py { };
+  duct = callPackage ../development/python-modules/duct { };
 
   duden = callPackage ../development/python-modules/duden { };
 
@@ -20274,6 +20274,8 @@ self: super: with self; {
   sumtypes = callPackage ../development/python-modules/sumtypes { };
 
   sunpy = callPackage ../development/python-modules/sunpy { };
+
+  sunsynk-api-client = callPackage ../development/python-modules/sunsynk-api-client { };
 
   suntime = callPackage ../development/python-modules/suntime { };
 
