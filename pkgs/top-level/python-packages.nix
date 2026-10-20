@@ -120,6 +120,8 @@ self: super: with self; {
 
   advantage-air = callPackage ../development/python-modules/advantage-air { };
 
+  advent-of-code-data = callPackage ../development/python-modules/advent-of-code-data { };
+
   aeidon = callPackage ../development/python-modules/aeidon { };
 
   aemet-opendata = callPackage ../development/python-modules/aemet-opendata { };
@@ -173,8 +175,6 @@ self: super: with self; {
   };
 
   aigpy = callPackage ../development/python-modules/aigpy { };
-
-  ailment = callPackage ../development/python-modules/ailment { };
 
   aio-geojson-client = callPackage ../development/python-modules/aio-geojson-client { };
 
@@ -1103,6 +1103,8 @@ self: super: with self; {
 
   angr = callPackage ../development/python-modules/angr { };
 
+  angr-data = callPackage ../development/python-modules/angr-data { };
+
   angrcli = callPackage ../development/python-modules/angrcli { inherit (pkgs) coreutils; };
 
   angrop = callPackage ../development/python-modules/angrop { };
@@ -1192,8 +1194,6 @@ self: super: with self; {
   anytree = callPackage ../development/python-modules/anytree { inherit (pkgs) graphviz; };
 
   anywidget = callPackage ../development/python-modules/anywidget { };
-
-  aocd = callPackage ../development/python-modules/aocd { };
 
   aocd-example-parser = callPackage ../development/python-modules/aocd-example-parser { };
 
@@ -3166,6 +3166,8 @@ self: super: with self; {
 
   citeproc-py = callPackage ../development/python-modules/citeproc-py { };
 
+  citeproc-py-styles = callPackage ../development/python-modules/citeproc-py-styles { };
+
   cjkwrap = callPackage ../development/python-modules/cjkwrap { };
 
   ckcc-protocol = callPackage ../development/python-modules/ckcc-protocol { };
@@ -3183,8 +3185,6 @@ self: super: with self; {
   clarifai-grpc = callPackage ../development/python-modules/clarifai-grpc { };
 
   clarifai-protocol = callPackage ../development/python-modules/clarifai-protocol { };
-
-  claripy = callPackage ../development/python-modules/claripy { };
 
   class-doc = callPackage ../development/python-modules/class-doc { };
 
@@ -4003,7 +4003,7 @@ self: super: with self; {
 
   cython_0 = callPackage ../development/python-modules/cython/0.nix { };
 
-  cython_3_3 = callPackage ../development/python-modules/cython/3_3.nix { };
+  cython_3_2 = callPackage ../development/python-modules/cython/3_2.nix { };
 
   cytoolz = callPackage ../development/python-modules/cytoolz { };
 
@@ -4241,6 +4241,8 @@ self: super: with self; {
   debugpy = callPackage ../development/python-modules/debugpy { };
 
   decli = callPackage ../development/python-modules/decli { };
+
+  declib = callPackage ../development/python-modules/declib { };
 
   declinate = callPackage ../development/python-modules/declinate { };
 
@@ -4792,6 +4794,8 @@ self: super: with self; {
       { };
 
   django-oauth-toolkit = callPackage ../development/python-modules/django-oauth-toolkit { };
+
+  django-oauth-toolkit_2 = callPackage ../development/python-modules/django-oauth-toolkit/2.nix { };
 
   django-organizations = callPackage ../development/python-modules/django-organizations { };
 
@@ -7268,11 +7272,7 @@ self: super: with self; {
 
   grad-cam = callPackage ../development/python-modules/grad-cam { };
 
-  gradient = callPackage ../development/python-modules/gradient { };
-
   gradient-statsd = callPackage ../development/python-modules/gradient-statsd { };
-
-  gradient-utils = callPackage ../development/python-modules/gradient-utils { };
 
   gradio = callPackage ../development/python-modules/gradio { };
 
@@ -7598,6 +7598,8 @@ self: super: with self; {
   hatch-requirements-txt = callPackage ../development/python-modules/hatch-requirements-txt { };
 
   hatch-sphinx = callPackage ../development/python-modules/hatch-sphinx { };
+
+  hatch-tryton = callPackage ../development/python-modules/hatch-tryton { };
 
   hatch-vcs = callPackage ../development/python-modules/hatch-vcs { };
 
@@ -9204,6 +9206,8 @@ self: super: with self; {
 
   kernels = callPackage ../development/python-modules/kernels { };
 
+  kernels-data = callPackage ../development/python-modules/kernels-data { };
+
   kestra = callPackage ../development/python-modules/kestra { };
 
   keyboard = callPackage ../development/python-modules/keyboard { };
@@ -9622,8 +9626,6 @@ self: super: with self; {
 
   libasyncns = callPackage ../development/python-modules/libasyncns { inherit (pkgs) libasyncns; };
 
-  libbs = callPackage ../development/python-modules/libbs { };
-
   libcap_ng = callPackage (
     {
       python,
@@ -9638,12 +9640,13 @@ self: super: with self; {
     )
   ) { };
 
-  libcec = toPythonModule (
-    pkgs.libcec.override {
-      python3 = python;
-      pythonSupport = true;
-    }
-  );
+  libcec =
+    (toPythonModule (
+      pkgs.libcec.override {
+        python3 = python;
+        pythonSupport = true;
+      }
+    )).python;
 
   libcloud = callPackage ../development/python-modules/libcloud { };
 
@@ -13440,6 +13443,10 @@ self: super: with self; {
 
   peewee-migrate = callPackage ../development/python-modules/peewee-migrate { };
 
+  peewee-migrate_1 = callPackage ../development/python-modules/peewee-migrate/1.nix { };
+
+  peewee_3 = callPackage ../development/python-modules/peewee/3.nix { };
+
   pefile = callPackage ../development/python-modules/pefile { };
 
   peft = callPackage ../development/python-modules/peft { };
@@ -13753,6 +13760,8 @@ self: super: with self; {
   playwright-stealth = callPackage ../development/python-modules/playwright-stealth { };
 
   playwrightcapture = callPackage ../development/python-modules/playwrightcapture { };
+
+  pleroma-bot = callPackage ../development/python-modules/pleroma-bot { };
 
   plexapi = callPackage ../development/python-modules/plexapi { };
 
@@ -14468,8 +14477,6 @@ self: super: with self; {
     }
   );
 
-  pyacaia-async = callPackage ../development/python-modules/pyacaia-async { };
-
   pyacoustid = callPackage ../development/python-modules/pyacoustid { };
 
   pyadjoint-ad = callPackage ../development/python-modules/pyadjoint-ad { };
@@ -14583,6 +14590,8 @@ self: super: with self; {
   pybase62 = callPackage ../development/python-modules/pybase62 { };
 
   pybase64 = callPackage ../development/python-modules/pybase64 { };
+
+  pybase91 = callPackage ../development/python-modules/pybase91 { };
 
   pybbox = callPackage ../development/python-modules/pybbox { };
 
@@ -14791,6 +14800,8 @@ self: super: with self; {
   pydanfossair = callPackage ../development/python-modules/pydanfossair { };
 
   pydantic = callPackage ../development/python-modules/pydantic { };
+
+  pydantic-ai-harness = callPackage ../development/python-modules/pydantic-ai-harness { };
 
   pydantic-ai-slim = callPackage ../development/python-modules/pydantic-ai-slim { };
 
@@ -15979,7 +15990,7 @@ self: super: with self; {
 
   pypytools = callPackage ../development/python-modules/pypytools { };
 
-  pyqodeng-angr = callPackage ../development/python-modules/pyqodeng-angr { };
+  pyqodeng = callPackage ../development/python-modules/pyqodeng { };
 
   pyqrcode = callPackage ../development/python-modules/pyqrcode { };
 
@@ -16886,8 +16897,6 @@ self: super: with self; {
 
   python-box = callPackage ../development/python-modules/python-box { };
 
-  python-broadlink = callPackage ../development/python-modules/python-broadlink { };
-
   python-bsblan = callPackage ../development/python-modules/python-bsblan { };
 
   python-bugzilla = callPackage ../development/python-modules/python-bugzilla { };
@@ -17654,6 +17663,8 @@ self: super: with self; {
   pyxbe = callPackage ../development/python-modules/pyxbe { };
 
   pyxdg = callPackage ../development/python-modules/pyxdg { };
+
+  pyxdia = callPackage ../development/python-modules/pyxdia { };
 
   pyxeoma = callPackage ../development/python-modules/pyxeoma { };
 
@@ -20410,7 +20421,7 @@ self: super: with self; {
 
   syrupy = callPackage ../development/python-modules/syrupy { };
 
-  syrupy_6 = callPackage ../development/python-modules/syrupy/6.nix { };
+  syrupy_5 = callPackage ../development/python-modules/syrupy/5.nix { };
 
   syslog-rfc5424-formatter = callPackage ../development/python-modules/syslog-rfc5424-formatter { };
 
@@ -22036,10 +22047,6 @@ self: super: with self; {
   unicodeit = callPackage ../development/python-modules/unicodeit { };
 
   unicorn = callPackage ../development/python-modules/unicorn { inherit (pkgs) unicorn; };
-
-  unicorn-angr = callPackage ../development/python-modules/unicorn-angr {
-    inherit (pkgs) unicorn-angr;
-  };
 
   unicrypto = callPackage ../development/python-modules/unicrypto { };
 
