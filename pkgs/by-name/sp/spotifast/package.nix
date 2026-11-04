@@ -34,11 +34,13 @@ let
     libxcursor
     libxi
     libxrandr
+    pipewire
+    libpulseaudio
   ];
 in
 rustPlatform.buildRustPackage rec {
   pname = "spotifast";
-  version = "0.17.0";
+  version = "0.17.1";
 
   __structuredAttrs = true;
 
@@ -46,10 +48,10 @@ rustPlatform.buildRustPackage rec {
     owner = "crmne";
     repo = "spotifast";
     tag = "v${version}";
-    hash = "sha256-jOESMVbwrxVkz6TRvy2RSK/bIPJC4DUkdVNsF22snr8=";
+    hash = "sha256-6BJpFjv0xSSQnk9/xRtsShsKUHup7uRDACPQLSKdwgg=";
   };
 
-  cargoHash = "sha256-PCu/sq9BIMVPS8aFDQQuBLu5GArNYEBligx5OdSJOBA=";
+  cargoHash = "sha256-4ozZxNRENy6qd9+l46dQQIx3bw0Ig/A1G4TXIYq0kMI=";
 
   # projectm-sys only searches lib, while CMake may otherwise install to lib64.
   postPatch = ''
