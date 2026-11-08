@@ -116,6 +116,14 @@ specifically so this can't happen again.
   `nix build .#<attr> --no-link` repeatedly, taking the "got:" hash from each failure and pasting it
   in, until the build succeeds. Do this once per fixed-output derivation (source fetch, cargo vendor,
   etc.) — don't guess hashes by hand.
+- **Long builds (Rust/C++ packages can exceed the 10-minute tool timeout).** Start the full build
+  with `run_in_background` and redirect output to a log in the scratchpad
+  (`nix build .#<attr> --no-link > "$S/build.log" 2>&1`); the harness sends a completion
+  notification on its own. Do **not** add a hand-rolled wait loop like
+  `until ! pgrep -f 'nix build .#<attr>'; do sleep 5; done` — `pgrep -f` matches the loop's own
+  command line, so it never exits and the shell task hangs forever (see pitfall 6). If a wait loop is
+  truly needed, poll a file or an exit-code marker instead, never a `pgrep -f` pattern that appears in
+  the loop's own text.
 - If upstream renamed the project, add a back-compat alias in `pkgs/top-level/aliases.nix`, in
   alphabetical position, using the `warnAlias` form (grep the file for recent `warnAlias` entries for
   the exact style):
@@ -322,3 +330,10 @@ something to fix immediately.
    maintainer called it out on PR #573650: "please have your harness use the actual pr template
    instead writing something kinda like it". Fix: step 5 now copies the real template file and only
    adds the summary, the AI disclosure paragraph, and ticked boxes.
+6. **Shell task hanging forever while waiting for a long `nix build`.** Cause: a background helper
+   `until ! pgrep -f 'nix build .#spotifast' ...; do sleep 5; done` — `pgrep -f` matches against full
+   command lines, including the helper's own `zsh -c` line that contains that very pattern, so the
+   condition never becomes false. The loop survived for 26+ minutes and across a session exit
+   (reported as a stuck/"stopped" task on the `spotifast` 0.13.3 and 0.14.1 updates). Fix: step 2's
+   "Long builds" note — rely on the `run_in_background` completion notification instead of
+   polling for the process.
