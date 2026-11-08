@@ -2557,6 +2557,15 @@ with self;
     propagatedBuildInputs = [ BioPerl ];
     htslibStore = toString pkgs.htslib;
 
+    patches = [
+      # t/05vcf.t hardcodes packed GT values predating htslib 1.22 prefixed
+      # phasing. Debian patch by Andreas Tille, Ensembl/Bio-DB-HTS#112.
+      (fetchpatch {
+        url = "https://salsa.debian.org/med-team/libbio-db-hts-perl/-/raw/8adcdbd08651ad5240169867b3727491ba611057/debian/patches/fix_vcf_gt_test.patch";
+        hash = "sha256-/hDFT1Md8uio1/AtI3j1AINxG9ux/L4k+ZN0NS9E7TA=";
+      })
+    ];
+
     preBuild = ''
       export HTSLIB_DIR=${pkgs.htslib}
     '';
@@ -10136,9 +10145,6 @@ with self;
     ];
     propagatedBuildInputs = [ DBI ];
 
-    postBuild = lib.optionalString stdenv.hostPlatform.isDarwin ''
-      install_name_tool -add_rpath "${pkgs.oracle-instantclient.lib}/lib" blib/arch/auto/DBD/Oracle/Oracle.bundle
-    '';
     meta = {
       description = "Oracle database driver for the DBI module";
       license = with lib.licenses; [
@@ -14606,10 +14612,10 @@ with self;
 
   FinanceQuote = buildPerlPackage rec {
     pname = "Finance-Quote";
-    version = "1.71";
+    version = "1.72";
     src = fetchurl {
       url = "mirror://cpan/authors/id/B/BP/BPSCHUCK/Finance-Quote-${version}.tar.gz";
-      hash = "sha256-MRMP4BqIZmOQdZhfyplHjJPA1zvUEaaVZbDUeD+vX+8=";
+      hash = "sha256-3COsMzrF53R1YpeHV95Ei4VVxUFcdlwrHByTfMMqaIQ=";
     };
     buildInputs = [
       DateManip
@@ -15291,17 +15297,17 @@ with self;
 
   GlibObjectIntrospection = buildPerlPackage {
     pname = "Glib-Object-Introspection";
-    version = "0.051";
+    version = "0.052";
     src = fetchurl {
-      url = "mirror://cpan/authors/id/X/XA/XAOC/Glib-Object-Introspection-0.051.tar.gz";
-      hash = "sha256-ZWlhHcyArBSCx8IiZLGujJw1HUmDUR65psX0ehAVAIk=";
+      url = "mirror://cpan/authors/id/X/XA/XAOC/Glib-Object-Introspection-0.052.tar.gz";
+      hash = "sha256-VVtPEwiTm7MUHqRXCtEuBOJ8IzKcMCydyHJUCeEEkRE=";
     };
     patches = [
-      # Fix build with gobject-introspection 1.82
-      # https://gitlab.gnome.org/GNOME/perl-glib-object-introspection/-/issues/7
+      # Fix build with glib >=2.89.0
+      # https://gitlab.gnome.org/GNOME/perl-glib-object-introspection/-/work_items/8
       (fetchpatch {
-        url = "https://gitlab.gnome.org/GNOME/perl-glib-object-introspection/-/commit/e5adffecdc9b321d1f8d91777b190b8ae08f8dd0.patch";
-        hash = "sha256-/QAhKENSeP+QRoWx/v8EMFPOouZ36Qd78lhZpvInz7Q=";
+        url = "https://gitlab.gnome.org/GNOME/perl-glib-object-introspection/-/commit/22b1d2c8f3cdf9351f37791b27b36c139a145383.patch";
+        hash = "sha256-5ZFKCr09OZlTs5SFaAVGkj6r55QMMmcOp0tAEVi1PPw=";
       })
     ];
     nativeBuildInputs = [
@@ -25170,10 +25176,12 @@ with self;
     meta = {
       description = "Perl bindings to the msgpack C library";
       homepage = "https://github.com/jacquesg/p5-MsgPack-Raw";
-      license = with lib.licenses; [
-        gpl1Plus # or
-        artistic1
-      ];
+      license =
+        with lib.licenses;
+        OR [
+          gpl1Plus
+          artistic1
+        ];
       maintainers = [ ];
     };
   };
@@ -25330,10 +25338,12 @@ with self;
     meta = {
       description = "Perl bindings for Neovim";
       homepage = "https://github.com/jacquesg/p5-Neovim-Ext";
-      license = with lib.licenses; [
-        gpl1Plus # or
-        artistic1
-      ];
+      license =
+        with lib.licenses;
+        OR [
+          gpl1Plus
+          artistic1
+        ];
       maintainers = [ ];
     };
   };

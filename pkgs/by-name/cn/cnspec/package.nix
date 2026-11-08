@@ -1,26 +1,26 @@
 {
   lib,
-  buildGoModule,
+  buildGo127Module,
   fetchFromGitHub,
   getent,
   versionCheckHook,
   writableTmpDirAsHomeHook,
 }:
 
-buildGoModule (finalAttrs: {
+buildGo127Module (finalAttrs: {
   pname = "cnspec";
-  version = "14.8.0";
+  version = "14.10.0";
 
   src = fetchFromGitHub {
     owner = "mondoohq";
     repo = "cnspec";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-RFpNtp5W3OadZwkY2sRvPSeIBl6JvQtTWDdqCw5aokI=";
+    hash = "sha256-K7UaECF+8Z/n0P0jvVsOCfK9w7YvaNWTv/z5xGPuLW0=";
   };
 
   proxyVendor = true;
 
-  vendorHash = "sha256-46GaMnpXPiM8ra7LC2drUylB20VxNriYIHNeVaYA+pI=";
+  vendorHash = "sha256-WfEX1oFQ53cdYaGcGUMLJAQepxM9dM5rptaFrU+WthY=";
 
   subPackages = [ "apps/cnspec" ];
 

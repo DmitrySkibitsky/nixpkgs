@@ -25,7 +25,6 @@ python3Packages.buildPythonApplication (finalAttrs: {
   pname = "librelane";
   version = "3.0.17";
   pyproject = true;
-  __structuredAttrs = true;
 
   src = fetchFromGitHub {
     owner = "librelane";
@@ -54,7 +53,7 @@ python3Packages.buildPythonApplication (finalAttrs: {
     cloup
     deprecated
     httpx
-    libparse-python
+    lln-libparse
     lxml
     numpy
     pandas

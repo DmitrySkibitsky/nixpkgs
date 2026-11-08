@@ -1,5 +1,6 @@
 {
   lib,
+  aws-lc,
   boost,
   cacert,
   cmake,
@@ -16,7 +17,7 @@
 
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "kingfisher";
-  version = "2.14.0";
+  version = "2.16.0";
 
   __structuredAttrs = true;
 
@@ -24,10 +25,10 @@ rustPlatform.buildRustPackage (finalAttrs: {
     owner = "mongodb";
     repo = "kingfisher";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-IE1ok5FKCP91MG+/unI/muJkOctBS/VlldwgtbXtV0c=";
+    hash = "sha256-SWkoeu8HlAKxVYiheLPrzPqs5T1wdVR2xtTtNm8SDzU=";
   };
 
-  cargoHash = "sha256-nP7siKy0x0vPyEnlXt4f7c2Y1PTrvd9Z+qmPyfKetng=";
+  cargoHash = "sha256-BlurVxShWjaVnmT4BJypxMsXMjmqVEyL6T3NtnBJFrU=";
 
   nativeBuildInputs = [
     cmake
@@ -35,6 +36,7 @@ rustPlatform.buildRustPackage (finalAttrs: {
   ];
 
   buildInputs = [
+    aws-lc
     boost
     libgit2
     openssl

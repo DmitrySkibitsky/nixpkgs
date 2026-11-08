@@ -22,16 +22,15 @@
 
 buildPythonPackage (finalAttrs: {
   pname = "apache-tvm-ffi";
-  version = "0.1.15-post0";
+  version = "0.1.15-post2";
   pyproject = true;
-  __structuredAttrs = true;
 
   src = fetchFromGitHub {
     owner = "apache";
     repo = "tvm-ffi";
     tag = "v${finalAttrs.version}";
     fetchSubmodules = true;
-    hash = "sha256-YY6dt8a4XOdnZhwWOGNpQfIYurm36Xo1tVWEM/i90sI=";
+    hash = "sha256-+7/nIa3IcEO+El5hpLLyead/yQR9rZLX4BmrfP1wRJQ=";
   };
 
   postPatch = ''

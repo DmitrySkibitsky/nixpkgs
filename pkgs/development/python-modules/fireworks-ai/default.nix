@@ -39,7 +39,6 @@ buildPythonPackage (finalAttrs: {
   pname = "fireworks-ai";
   version = "1.2.26";
   pyproject = true;
-  __structuredAttrs = true;
 
   src = fetchFromGitHub {
     owner = "fw-ai-external";
@@ -114,7 +113,7 @@ buildPythonPackage (finalAttrs: {
     description = "Client library for Fireworks.ai";
     homepage = "https://github.com/fw-ai-external/python-sdk";
     changelog = "https://github.com/fw-ai-external/python-sdk/blob/${finalAttrs.src.tag}/CHANGELOG.md";
-    license = lib.licenses.mit;
+    license = lib.licenses.asl20;
     maintainers = with lib.maintainers; [ sarahec ];
   };
 })

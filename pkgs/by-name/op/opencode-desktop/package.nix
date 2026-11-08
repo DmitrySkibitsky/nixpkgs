@@ -1,8 +1,8 @@
 {
+  actool,
   autoPatchelfHook,
   bun,
   copyDesktopItems,
-  darwin,
   electron_44,
   lib,
   makeBinaryWrapper,
@@ -10,6 +10,7 @@
   models-dev,
   nodejs,
   opencode,
+  rcodesign,
   stdenv,
   stdenvNoCC,
   writableTmpDirAsHomeHook,
@@ -63,7 +64,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     writableTmpDirAsHomeHook
   ]
   ++ lib.optionals stdenvNoCC.hostPlatform.isDarwin [
-    darwin.autoSignDarwinBinariesHook
+    actool
   ]
   ++ lib.optionals stdenvNoCC.hostPlatform.isLinux [
     autoPatchelfHook
@@ -123,7 +124,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     bun run build
 
     # Package with electron-builder (unpacked directory mode)
-    cp -r "${electron.dist}" $HOME/.electron-dist
+    cp -r ${electron.dist} "$HOME/.electron-dist"
     chmod -R u+w $HOME/.electron-dist
 
     npx electron-builder --dir \
@@ -157,8 +158,8 @@ stdenvNoCC.mkDerivation (finalAttrs: {
       ''
       (lib.optionalString stdenvNoCC.hostPlatform.isDarwin ''
         mkdir -p $out/Applications $out/bin
-        mv packages/desktop/dist/mac-*/OpenCode.app "$out/Applications/OpenCode.app"
-        makeWrapper "$out/Applications/OpenCode.app/Contents/MacOS/OpenCode" $out/bin/opencode-desktop
+        mv packages/desktop/dist/mac-*/OpenCode.app $out/Applications/OpenCode.app
+        makeWrapper $out/Applications/OpenCode.app/Contents/MacOS/OpenCode $out/bin/opencode-desktop
       '')
       (lib.optionalString stdenvNoCC.hostPlatform.isLinux ''
         mkdir -p $out/opt/opencode-desktop
@@ -188,6 +189,14 @@ stdenvNoCC.mkDerivation (finalAttrs: {
         runHook postInstall
       ''
     ];
+
+  stripDebugList = lib.optionals stdenvNoCC.hostPlatform.isDarwin [
+    "Applications/OpenCode.app/Contents/MacOS"
+  ];
+
+  postFixup = lib.optionalString stdenv.hostPlatform.isDarwin ''
+    ${lib.getExe rcodesign} sign $out/Applications/OpenCode.app
+  '';
 
   meta = {
     description = "AI coding agent desktop client";

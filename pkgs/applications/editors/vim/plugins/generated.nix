@@ -4015,6 +4015,20 @@ final: prev: {
     meta.hydraPlatforms = [ ];
   };
 
+  confetti-vim-syntax = buildVimPlugin {
+    pname = "confetti-vim-syntax";
+    version = "0.1.0";
+    src = fetchFromGitHub {
+      owner = "unclechu";
+      repo = "confetti-vim-syntax";
+      tag = "v0.1.0";
+      hash = "sha256-1aUmEG2x+WsrjL+6Tixoh4rzx1PeCBw2JxyWuh6qxjA=";
+    };
+    meta.homepage = "https://github.com/unclechu/confetti-vim-syntax/";
+    meta.license = getLicenseFromSpdxId "Unlicense";
+    meta.hydraPlatforms = [ ];
+  };
+
   conflict-marker-vim = buildVimPlugin {
     pname = "conflict-marker.vim";
     version = "0-unstable-2024-05-20";
@@ -15120,6 +15134,20 @@ final: prev: {
     meta.hydraPlatforms = [ ];
   };
 
+  pentatonic-nvim = buildVimPlugin {
+    pname = "pentatonic.nvim";
+    version = "0.2.0";
+    src = fetchFromGitHub {
+      owner = "farbzen";
+      repo = "pentatonic.nvim";
+      tag = "v0.2.0";
+      hash = "sha256-uTggdO2ex1ryb9O/5T2p4Kq7+GKE4pvS7sOr42YPfDQ=";
+    };
+    meta.homepage = "https://github.com/farbzen/pentatonic.nvim/";
+    meta.license = getLicenseFromSpdxId "MIT";
+    meta.hydraPlatforms = [ ];
+  };
+
   perfanno-nvim = buildVimPlugin {
     pname = "perfanno.nvim";
     version = "0-unstable-2026-01-20";
@@ -17430,6 +17458,20 @@ final: prev: {
     };
     meta.homepage = "https://github.com/godlygeek/tabular/";
     meta.license = unfree;
+    meta.hydraPlatforms = [ ];
+  };
+
+  tacho-nvim = buildVimPlugin {
+    pname = "tacho.nvim";
+    version = "0.2.0";
+    src = fetchFromGitHub {
+      owner = "farbzen";
+      repo = "tacho.nvim";
+      tag = "v0.2.0";
+      hash = "sha256-cCYjC4zMUbdFKH7DOmqSd1MpTIX1BFZawkXVWKcag9w=";
+    };
+    meta.homepage = "https://github.com/farbzen/tacho.nvim/";
+    meta.license = getLicenseFromSpdxId "MIT";
     meta.hydraPlatforms = [ ];
   };
 

@@ -10,28 +10,30 @@
   pipewire,
   libva,
   mesa,
+  zstd,
   lib,
   stdenv,
   nix-update-script,
 }:
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "concord-tui";
-  version = "2.6.3";
+  version = "2.6.4";
 
   src = fetchFromGitHub {
     owner = "chojs23";
     repo = "concord";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-B0bIwhU/hOIqap3nRwWXQUB4UvXqQs+PDwfaiSBOaA8=";
+    hash = "sha256-RvxNXlwCF6ER4crGdAHpc7qFLGGyU92pmfgWVLuF/XM=";
   };
 
-  cargoHash = "sha256-ovHqPjnkPUbulFmnnePJemBhwJZbqjNCMtUqRTWPv1U=";
+  cargoHash = "sha256-wAG8il84ArySdlZnF66YiCP1DK5S1Pl39h1J0AQ48/I=";
 
   buildInputs = lib.optionals stdenv.hostPlatform.isLinux [
     alsa-lib
     pipewire
     libva
     mesa
+    zstd
   ];
   nativeBuildInputs = [
     cmake

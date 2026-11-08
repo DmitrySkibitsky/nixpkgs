@@ -5,11 +5,18 @@
   nix-update-script,
 }:
 
-python3Packages.buildPythonApplication (finalAttrs: {
+let
+  pythonPackages = python3Packages.overrideScope (
+    final: prev: {
+      # Necessary until fastmcp works with mcp 2.x
+      mcp = final.mcp_1;
+    }
+  );
+in
+pythonPackages.buildPythonApplication (finalAttrs: {
   pname = "hindsight-api-slim";
   version = "1.1.0";
   pyproject = true;
-  __structuredAttrs = true;
 
   src = fetchFromGitHub {
     owner = "vectorize-io";
@@ -20,7 +27,7 @@ python3Packages.buildPythonApplication (finalAttrs: {
 
   sourceRoot = "${finalAttrs.src.name}/hindsight-api-slim";
 
-  build-system = with python3Packages; [ hatchling ];
+  build-system = with pythonPackages; [ hatchling ];
 
   pythonRemoveDeps = [
     # Not packaged in nixpkgs, and only used by the optional Copilot LLM provider
@@ -39,7 +46,7 @@ python3Packages.buildPythonApplication (finalAttrs: {
   ];
 
   dependencies =
-    with python3Packages;
+    with pythonPackages;
     [
       aiohttp
       alembic

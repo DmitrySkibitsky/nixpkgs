@@ -419,7 +419,10 @@ in
   chhoto-url = runTest ./chhoto-url.nix;
   chipass = runTest ./chipass.nix;
   chromadb = runTest ./chromadb.nix;
-  chromium = (handleTestOn [ "aarch64-linux" "x86_64-linux" ] ./chromium.nix { }).stable or { };
+  chromium = runTestOn [ "aarch64-linux" "x86_64-linux" ] {
+    imports = [ ./chromium.nix ];
+    _module.args.chromiumPackage = pkgs.chromium;
+  };
   chrony = runTestOn [ "aarch64-linux" "x86_64-linux" ] ./chrony.nix;
   chrony-ptp = runTestOn [ "aarch64-linux" "x86_64-linux" ] ./chrony-ptp.nix;
   cinnamon = runTest ./cinnamon.nix;
@@ -634,6 +637,7 @@ in
   facter = runTest ./facter;
   fail2ban = runTest ./fail2ban.nix;
   fakeroute = runTest ./fakeroute.nix;
+  falco = runTest ./falco.nix;
   fancontrol = runTest ./fancontrol.nix;
   fanout = runTest ./fanout.nix;
   fastnetmon-advanced = runTest ./fastnetmon-advanced.nix;
@@ -722,12 +726,8 @@ in
   fsck = runTest ./fsck.nix;
   fscrypt = runTest ./fscrypt.nix;
   ft2-clone = runTest ./ft2-clone.nix;
-  galene = discoverTests (import ./galene.nix { inherit runTest; });
+  galene = import ./galene.nix { inherit runTest; };
   gancio = runTest ./gancio.nix;
-  garage_1 = import ./garage {
-    inherit runTest;
-    package = pkgsLinux.garage_1;
-  };
   garage_2 = import ./garage {
     inherit runTest;
     package = pkgsLinux.garage_2;
@@ -774,6 +774,7 @@ in
   gocd-server = runTest ./gocd-server.nix;
   gocron = runTest ./gocron.nix;
   gocryptfs = runTest ./gocryptfs.nix;
+  goeland = runTest ./goeland.nix;
   gokapi = runTest ./gokapi.nix;
   gollum = runTest ./gollum.nix;
   gonic = runTest ./gonic.nix;
@@ -795,6 +796,7 @@ in
   graylog = runTest ./graylog.nix;
   greenlight = runTest ./greenlight.nix;
   greetd-no-shadow = runTest ./greetd-no-shadow.nix;
+  grimmory = runTest ./grimmory.nix;
   grist = runTest ./grist.nix;
   grocy = runTest ./grocy.nix;
   grow-partition = runTest ./grow-partition.nix;
@@ -960,10 +962,6 @@ in
   kernel-generic = handleTest ./kernel-generic { };
   kernel-latest-ath-user-regd = runTest ./kernel-latest-ath-user-regd.nix;
   kernel-module-verification = runTest ./kernel-module-verification.nix;
-  kernel-module-verification-latest = runTest {
-    imports = [ ./kernel-module-verification.nix ];
-    _module.args.latestKernel = true;
-  };
   kernel-rust = handleTest ./kernel-rust.nix { };
   keter = runTest ./keter.nix;
   kexec = runTest ./kexec.nix;
@@ -1002,8 +1000,16 @@ in
   lasuite-docs = runTest ./web-apps/lasuite-docs.nix;
   lasuite-drive = runTest ./web-apps/lasuite-drive.nix;
   lasuite-meet = runTest ./web-apps/lasuite-meet.nix;
+  latestKernel.kernel-module-verification = runTest {
+    imports = [ ./kernel-module-verification.nix ];
+    _module.args.latestKernel = true;
+  };
   latestKernel.login = runTest {
     imports = [ ./login.nix ];
+    _module.args.latestKernel = true;
+  };
+  latestKernel.systemd-nsresourced-mountfsd = runTest {
+    imports = [ ./systemd-nsresourced-mountfsd.nix ];
     _module.args.latestKernel = true;
   };
   lauti = runTest ./lauti.nix;
@@ -1303,7 +1309,7 @@ in
   npmrc = runTest ./npmrc.nix;
   nscd = runTest ./nscd.nix;
   nsd = runTest ./nsd.nix;
-  ntfy-sh = handleTest ./ntfy-sh.nix { };
+  ntfy-sh = runTest ./ntfy-sh.nix;
   ntfy-sh-migration = handleTest ./ntfy-sh-migration.nix { };
   ntpd = runTest ./ntpd.nix;
   ntpd-rs = runTest ./ntpd-rs.nix;
@@ -1562,7 +1568,7 @@ in
   qboot = runTestOn [ "x86_64-linux" "i686-linux" ] ./qboot.nix;
   qemu-firmware = runTestOn [ "x86_64-linux" ] ./qemu-firmware.nix;
   qemu-vm-external-disk-image = runTest ./qemu-vm-external-disk-image.nix;
-  qemu-vm-restrictnetwork = handleTest ./qemu-vm-restrictnetwork.nix { };
+  qemu-vm-restrictnetwork = runTest ./qemu-vm-restrictnetwork.nix;
   qemu-vm-shared-directories = runTest ./qemu-vm-shared-directories.nix;
   qemu-vm-store = runTest ./qemu-vm-store.nix;
   qemu-vm-volatile-root = runTest ./qemu-vm-volatile-root.nix;
@@ -1657,8 +1663,7 @@ in
   schleuder = runTest ./schleuder.nix;
   scion-freestanding-deployment = runTest ./scion/freestanding-deployment;
   scrutiny = runTest ./scrutiny.nix;
-  scx = runTest ./scx/default.nix;
-  scx-loader = runTest ./scx/loader.nix;
+  scx-loader = runTest ./scx-loader.nix;
   sddm = import ./sddm.nix { inherit runTest; };
   sdl3 = runTest ./sdl3.nix;
   searx = runTest ./searx.nix;
@@ -1714,7 +1719,7 @@ in
   ssh-agent-auth = runTest ./ssh-agent-auth.nix;
   ssh-audit = runTest ./ssh-audit.nix;
   sshwifty = runTest ./web-apps/sshwifty/default.nix;
-  sslh = handleTest ./sslh.nix { };
+  sslh = runTest ./sslh.nix;
   sssd-ldap = handleTestOn [ "x86_64-linux" "aarch64-linux" ] ./sssd-ldap.nix { };
   sssd-legacy-config = handleTestOn [ "x86_64-linux" "aarch64-linux" ] ./sssd-legacy-config.nix { };
   sstorytime = runTest ./sstorytime.nix;
@@ -1937,6 +1942,10 @@ in
   umami = runTest ./web-apps/umami.nix;
   umurmur = runTest ./umurmur.nix;
   unbound = runTest ./unbound.nix;
+  ungoogled-chromium = runTestOn [ "aarch64-linux" "x86_64-linux" ] {
+    imports = [ ./chromium.nix ];
+    _module.args.chromiumPackage = pkgs.ungoogled-chromium;
+  };
   unifi = runTest ./unifi.nix;
   unit-perl = runTest ./web-servers/unit-perl.nix;
   unpackerr = runTest ./unpackerr.nix;
@@ -2055,6 +2064,7 @@ in
     inherit lib runTest;
   };
   yggdrasil = runTest ./yggdrasil.nix;
+  yopass = import ./web-apps/yopass.nix { inherit pkgs runTest; };
   your_spotify = runTest ./your_spotify.nix;
   zammad = runTest ./zammad.nix;
   zapret2 = runTest ./zapret2.nix;
